@@ -12,6 +12,6 @@
 
 #import "Spokestack.h"
 
-FOUNDATION_EXPORT double Spokestack_iOSVersionNumber;
-FOUNDATION_EXPORT const unsigned char Spokestack_iOSVersionString[];
+FOUNDATION_EXPORT double SpokestackVersionNumber;
+FOUNDATION_EXPORT const unsigned char SpokestackVersionString[];
 

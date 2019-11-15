@@ -7,7 +7,7 @@
 //
 
 import SwiftUI
-import Spokestack_iOS
+import Spokestack
 
 struct ContentView: View {
     var body: some View {
