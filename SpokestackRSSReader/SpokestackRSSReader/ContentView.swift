@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Spokestack
+import FeedKit
 
 struct ContentView: View {
     var body: some View {

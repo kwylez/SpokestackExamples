@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,6 +13,7 @@
 		011D48E6237DB6E400EA951E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 011D48E5237DB6E400EA951E /* Assets.xcassets */; };
 		011D48E9237DB6E400EA951E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 011D48E8237DB6E400EA951E /* Preview Assets.xcassets */; };
 		011D48EC237DB6E400EA951E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 011D48EA237DB6E400EA951E /* LaunchScreen.storyboard */; };
+		01347004237F562100AD3588 /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 01347003237F562100AD3588 /* FeedKit */; };
 		D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */,
+				01347004237F562100AD3588 /* FeedKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,7 +90,6 @@
 				71C186BE003D4E0DBE442724 /* Pods-SpokestackRSSReader.debug.xcconfig */,
 				D68062BDDD01709279040487 /* Pods-SpokestackRSSReader.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -117,6 +118,9 @@
 			dependencies = (
 			);
 			name = SpokestackRSSReader;
+			packageProductDependencies = (
+				01347003237F562100AD3588 /* FeedKit */,
+			);
 			productName = SpokestackRSSReader;
 			productReference = 011D48DC237DB6E200EA951E /* SpokestackRSSReader.app */;
 			productType = "com.apple.product-type.application";
@@ -145,6 +149,9 @@
 				Base,
 			);
 			mainGroup = 011D48D3237DB6E200EA951E;
+			packageReferences = (
+				01347002237F562100AD3588 /* XCRemoteSwiftPackageReference "FeedKit" */,
+			);
 			productRefGroup = 011D48DD237DB6E200EA951E /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -395,6 +402,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		01347002237F562100AD3588 /* XCRemoteSwiftPackageReference "FeedKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nmdias/FeedKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		01347003237F562100AD3588 /* FeedKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 01347002237F562100AD3588 /* XCRemoteSwiftPackageReference "FeedKit" */;
+			productName = FeedKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 011D48D4237DB6E200EA951E /* Project object */;
 }
