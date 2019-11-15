@@ -1,0 +1,6 @@
+framework module Pods_SpokestackRSSReader {
+  umbrella header "Pods-SpokestackRSSReader-umbrella.h"
+
+  export *
+  module * { export * }
+}

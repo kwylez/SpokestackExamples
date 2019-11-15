@@ -1,0 +1,6 @@
+framework module Spokestack_iOS {
+  umbrella header "Spokestack-iOS-umbrella.h"
+
+  export *
+  module * { export * }
+}
