@@ -18,14 +18,14 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(viewModel.feeds) { item in
-                    FeedRow(feed: item)
+                ForEach(viewModel.feedItems) { item in
+                    FeedItemRow(feedItem: item)
                 }
             }
             .onAppear{
                 self.viewModel.load()
             }
-            .navigationBarTitle("TechCrunch")
+            .navigationBarTitle("Spokestack RSS Reader")
         }
     }
 }

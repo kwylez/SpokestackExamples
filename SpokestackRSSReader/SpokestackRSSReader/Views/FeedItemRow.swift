@@ -9,11 +9,11 @@
 import Foundation
 import SwiftUI
 
-struct FeedRow: View {
+struct FeedItemRow: View {
 
-    var feed: RSSFeed
+    var feedItem: RSSFeedItem
 
     var body: some View {
-        Text("Come and eat at \(feed.description)")
+        Text("Come and eat at \(feedItem.title)")
     }
 }

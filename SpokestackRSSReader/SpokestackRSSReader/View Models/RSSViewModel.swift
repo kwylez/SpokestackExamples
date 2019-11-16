@@ -13,7 +13,7 @@ class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
     
-    @Published private (set) var feeds: Array<RSSFeed> = []
+    @Published private (set) var feedItems: Array<RSSFeedItem> = []
     
     // MARK: Initializers
     
@@ -30,16 +30,16 @@ class RSSViewModel: ObservableObject {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [unowned self] in
             
-            let items: Array<RSSFeed> = [
-                RSSFeed(title: "Hello World",
+            let items: Array<RSSFeedItem> = [
+                RSSFeedItem(title: "Hello World",
                          link: "http://www.yahoo.com/",
-                         description: "First Descriptions", items: []),
-                RSSFeed(title: "Hello World 2",
+                         description: "First Descriptions"),
+                RSSFeedItem(title: "Hello World 2",
                          link: "http://www.google.com/",
-                         description: "First Descriptions 2", items: [])
+                         description: "First Descriptions 2")
             ]
             
-            self.feeds = items
+            self.feedItems = items
         }
     }
 }

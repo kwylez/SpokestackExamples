@@ -37,10 +37,13 @@ class RSSController {
                     
                     switch feed {
                         case .atom(let atomFeed):
+                            print("atom feed \(String(describing: atomFeed.links))")
                         break
                         case .rss(let rssFeed):
+                            print("rssFeed feed \(String(describing: rssFeed.items))")
                         break
                         case .json(let jsonFeed):
+                            print("json feed \(String(describing: jsonFeed.items))")
                         break
                     }
                     
