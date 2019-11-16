@@ -9,6 +9,8 @@
 import Foundation
 import FeedKit
 
+typealias RSSControllerParseCallback = (_ feedItems: Array<RSSFeedItem>) -> Void
+
 class RSSController {
     
     // MARK: Private (properties)
@@ -23,35 +25,36 @@ class RSSController {
     
     // MARK: Internal (methods)
     
-    func parseFeed() -> Void {
+    func parseFeed(_ callback: @escaping RSSControllerParseCallback) -> Void {
         
         let parser = FeedParser(URL: self.feedURL)
         
         parser.parseAsync(queue: DispatchQueue.global(qos: .userInitiated)) {result in
             
-            DispatchQueue.main.async {
-                switch result {
-                    
-                case .success(let feed):
-                    print("what is my feed \(feed)")
-                    
-                    switch feed {
-                        case .atom(let atomFeed):
-                            print("atom feed \(String(describing: atomFeed.links))")
-                        break
-                        case .rss(let rssFeed):
-                            print("rssFeed feed \(String(describing: rssFeed.items))")
-                        break
-                        case .json(let jsonFeed):
-                            print("json feed \(String(describing: jsonFeed.items))")
-                        break
-                    }
-                    
+            var feedItems: Array<RSSFeedItem> = []
+                        
+            switch result {
+                
+            case .success(let feed):
+
+                switch feed {
+                    case .atom(let atomFeed):
+                        feedItems = atomFeed.convert()
                     break
-                case .failure(let error):
-                    print("is there an error \(error)")
+                    case .rss(let rssFeed):
+                        feedItems = rssFeed.convert()
+                    break
+                    case .json(let jsonFeed):
+                        feedItems = jsonFeed.convert()
                     break
                 }
+                break
+            default:
+                break
+            }
+            
+            DispatchQueue.main.async {
+                callback(feedItems)
             }
         }
     }

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import FeedKit
 
 struct RSSFeedItem: Identifiable {
     
@@ -20,3 +21,4 @@ struct RSSFeedItem: Identifiable {
     
     let description: String
 }
+

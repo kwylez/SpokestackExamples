@@ -18,6 +18,7 @@
 		01347008237F5E2E00AD3588 /* RSSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347007237F5E2E00AD3588 /* RSSController.swift */; };
 		0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347009237FA7DA00AD3588 /* RSSFeedItem.swift */; };
 		0134700E237FB07A00AD3588 /* FeedItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0134700D237FB07A00AD3588 /* FeedItemRow.swift */; };
+		01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F538D82380781C00367C91 /* FeedKit+Extensions.swift */; };
 		D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */; };
 /* End PBXBuildFile section */
 
@@ -34,6 +35,7 @@
 		01347007237F5E2E00AD3588 /* RSSController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSController.swift; sourceTree = "<group>"; };
 		01347009237FA7DA00AD3588 /* RSSFeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedItem.swift; sourceTree = "<group>"; };
 		0134700D237FB07A00AD3588 /* FeedItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemRow.swift; sourceTree = "<group>"; };
+		01F538D82380781C00367C91 /* FeedKit+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedKit+Extensions.swift"; sourceTree = "<group>"; };
 		1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpokestackRSSReader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71C186BE003D4E0DBE442724 /* Pods-SpokestackRSSReader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpokestackRSSReader.debug.xcconfig"; path = "Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader.debug.xcconfig"; sourceTree = "<group>"; };
 		D68062BDDD01709279040487 /* Pods-SpokestackRSSReader.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpokestackRSSReader.release.xcconfig"; path = "Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader.release.xcconfig"; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 				011D48ED237DB6E400EA951E /* Info.plist */,
 				011D48DF237DB6E200EA951E /* AppDelegate.swift */,
 				01025B282380732D00809F88 /* Controllers */,
+				01F538D72380780800367C91 /* Extensions */,
 				01025B262380731300809F88 /* Models */,
 				011D48E7237DB6E400EA951E /* Preview Content */,
 				01025B23238072A300809F88 /* UI */,
@@ -134,6 +137,14 @@
 				011D48E8237DB6E400EA951E /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		01F538D72380780800367C91 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				01F538D82380781C00367C91 /* FeedKit+Extensions.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		5F1E9704D0A6302A2DEE1DBF /* Pods */ = {
@@ -258,6 +269,7 @@
 			files = (
 				011D48E0237DB6E200EA951E /* AppDelegate.swift in Sources */,
 				01347006237F5E2700AD3588 /* RSSViewModel.swift in Sources */,
+				01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */,
 				0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */,
 				0134700E237FB07A00AD3588 /* FeedItemRow.swift in Sources */,
 				011D48E2237DB6E200EA951E /* SceneDelegate.swift in Sources */,

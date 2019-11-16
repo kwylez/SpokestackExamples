@@ -13,6 +13,8 @@ class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
     
+    var feed: String = "https://feeds.feedburner.com/TechCrunch/"
+    
     @Published private (set) var feedItems: Array<RSSFeedItem> = []
     
     // MARK: Initializers
@@ -23,23 +25,11 @@ class RSSViewModel: ObservableObject {
     
     func load() -> Void {
         
-        let feedURL: URL = URL(string: "https://feeds.feedburner.com/TechCrunch/")!
+        let feedURL: URL = URL(string: self.feed)!
         let rssController: RSSController = RSSController(feedURL)
         
-        rssController.parseFeed()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [unowned self] in
-            
-            let items: Array<RSSFeedItem> = [
-                RSSFeedItem(title: "Hello World",
-                         link: "http://www.yahoo.com/",
-                         description: "First Descriptions"),
-                RSSFeedItem(title: "Hello World 2",
-                         link: "http://www.google.com/",
-                         description: "First Descriptions 2")
-            ]
-            
-            self.feedItems = items
-        }
+        rssController.parseFeed({feedItems in
+            self.feedItems = feedItems
+        })
     }
 }

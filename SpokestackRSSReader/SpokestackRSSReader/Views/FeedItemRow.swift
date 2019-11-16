@@ -14,6 +14,10 @@ struct FeedItemRow: View {
     var feedItem: RSSFeedItem
 
     var body: some View {
-        Text("Come and eat at \(feedItem.title)")
+    
+        VStack(alignment: .leading, spacing: 10.0) {
+            Text("\(feedItem.title)").font(.headline).fontWeight(.semibold)
+            Text("\(feedItem.description)").font(.body)
+        }
     }
 }
