@@ -1,5 +1,5 @@
 //
-//  FeedItem.swift
+//  Feed.swift
 //  SpokestackRSSReader
 //
 //  Created by Cory Wiles on 11/15/19.
@@ -7,8 +7,9 @@
 //
 
 import Foundation
+import FeedKit
 
-struct FeedItem: Identifiable {
+struct RSSFeed: Identifiable {
     
     // MARK: Internal (properties)
     
@@ -19,4 +20,8 @@ struct FeedItem: Identifiable {
     let link: String
     
     let description: String
+    
+    let items: Array<RSSFeedItem>
 }
+
+

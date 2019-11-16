@@ -11,7 +11,7 @@ import SwiftUI
 
 struct FeedRow: View {
 
-    var feed: Feed
+    var feed: RSSFeed
 
     var body: some View {
         Text("Come and eat at \(feed.description)")
