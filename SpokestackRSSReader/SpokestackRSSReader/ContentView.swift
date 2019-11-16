@@ -10,9 +10,26 @@ import SwiftUI
 import Spokestack
 import FeedKit
 
+let items: Array<Feed> = [
+    Feed(title: "Hello World",
+             link: "http://www.yahoo.com/",
+             description: "First Descriptions", items: []),
+    Feed(title: "Hello World 2",
+             link: "http://www.google.com/",
+             description: "First Descriptions 2", items: [])
+]
+
 struct ContentView: View {
+    
     var body: some View {
-        Text("Hello, World!")
+        NavigationView {
+            List {
+                ForEach(items) { item in
+                    FeedRow(feed: item)
+                }
+            }
+            .navigationBarTitle("TechCrunch")
+        }
     }
 }
 
