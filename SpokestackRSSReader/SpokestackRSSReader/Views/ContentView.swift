@@ -11,9 +11,6 @@ import Spokestack
 import FeedKit
 import Combine
 
-let gradientStart = Color(red: 239.0 / 255, green: 120.0 / 255, blue: 221.0 / 255)
-let gradientEnd = Color(red: 239.0 / 255, green: 172.0 / 255, blue: 120.0 / 255)
-
 struct ContentView: View {
     
     @ObservedObject var viewModel: RSSViewModel = RSSViewModel()
@@ -21,29 +18,22 @@ struct ContentView: View {
     var body: some View {
         
         NavigationView {
-            GeometryReader{ geometry in
-                VStack {
-                
-                    Rectangle()
-                    .fill(LinearGradient(
-                      gradient: .init(colors: [gradientStart, gradientEnd]),
-                      startPoint: .init(x: 0.5, y: 0),
-                      endPoint: .init(x: 0.5, y: 0.6)
-                    ))
-                    .cornerRadius(5)
-                    .frame(width: geometry.size.width * 0.95, height: 120.0)
-                    
-                    List {
-                        ForEach(self.viewModel.feedItems) { item in
-                            FeedItemRow(feedItem: item)
-                        }
+
+            VStack(alignment: .center, spacing: 0.0) {
+                RSSFeedTitleHeaderView().frame(width: UIScreen.main.bounds.size.width * 0.95, height: 120.0)
+                List {
+                    ForEach(self.viewModel.feedItems) { item in
+                        FeedItemRow(feedItem: item)
                     }
                 }
-                .onAppear{
-                    self.viewModel.load()
-                }
-                .navigationBarTitle("Spokestack RSS Reader")
+                Spacer()
             }
+            .onAppear{
+                self.viewModel.activatePipeline()
+            }.onDisappear() {
+                self.viewModel.deactivePipeline()
+            }
+            .navigationBarTitle("Spokestack RSS Reader")
         }
     }
 }

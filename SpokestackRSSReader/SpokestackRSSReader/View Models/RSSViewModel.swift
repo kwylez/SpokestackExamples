@@ -17,11 +17,23 @@ class RSSViewModel: ObservableObject {
     
     @Published private (set) var feedItems: Array<RSSFeedItem> = []
     
+    // MARK: Private (properties)
+    
+    private var speechController: SpeechController = SpeechController()
+    
     // MARK: Initializers
     
     init() {}
     
     // MARK: Internal (methods)
+    
+    func activatePipeline() -> Void {
+        self.speechController.start()
+    }
+    
+    func deactivePipeline() -> Void {
+        self.speechController.stop()
+    }
     
     func load() -> Void {
         
