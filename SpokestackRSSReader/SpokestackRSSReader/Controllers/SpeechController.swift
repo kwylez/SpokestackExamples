@@ -73,14 +73,14 @@ final class SpeechController: NSObject {
             return
         }
         
-        let nsrange = NSRange(self.transcript.startIndex..<self.transcript.endIndex, in: self.transcript)
-        let nsText = self.transcript as NSString
+        let nsrange: NSRange = NSRange(self.transcript.startIndex..<self.transcript.endIndex, in: self.transcript)
+        let nsText: NSString = self.transcript as NSString
         
-        regex.enumerateMatches(in: self.transcript,
-                           options: [],
-                           range: nsrange) { result, flags, stop in
+        regex.enumerateMatches(in: self.transcript, options: [], range: nsrange) { result, flags, stop in
                             
-                            guard let result = result else { return }
+                            guard let result = result else {
+                                return
+                            }
                             
                             let range = result.range
                             let foundText = nsText.substring(with: range)
