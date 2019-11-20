@@ -9,9 +9,25 @@
 import Foundation
 import Spokestack
 
+protocol SpeechControllerDelegate: class {
+    
+    func didFindResult(_ text: String, controller: SpeechController) -> Void
+}
+
 final class SpeechController: NSObject {
     
+    // MARK: Internal (properties)
+    
+    weak var delegate: SpeechControllerDelegate?
+    
     // MARK: Private (properties)
+    
+    private var transcript: String = "" {
+        
+        didSet {
+            transcript = transcript.lowercased()
+        }
+    }
     
     lazy private var pipeline: SpeechPipeline = {
     
@@ -43,15 +59,50 @@ final class SpeechController: NSObject {
     func stop() -> Void {
         self.pipeline.stop()
     }
+    
+    // MARK: Private (methods)
+    
+    private func parse() -> Void {
+//         Read my latest TechCrunch news
+
+        let pattern = #"""
+        (read|what|mark \h as \h read).*(latest|oldest)\s(tech\s?crunch|cnn|seen \h the \h news)
+        """#
+
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return
+        }
+        
+        let nsrange = NSRange(self.transcript.startIndex..<self.transcript.endIndex, in: self.transcript)
+        let nsText = self.transcript as NSString
+        
+        regex.enumerateMatches(in: self.transcript,
+                           options: [],
+                           range: nsrange) { result, flags, stop in
+                            
+                            guard let result = result else { return }
+                            
+                            let range = result.range
+                            let foundText = nsText.substring(with: range)
+
+                            print("found text \(foundText)")
+                            
+                            // TODO: User publisher / subscriber
+                            
+                            self.delegate?.didFindResult(foundText, controller: self)
+        }
+    }
 }
 
 extension SpeechController: SpeechEventListener {
+    
     func activate() {
         print("did activate")
     }
     
     func deactivate() {
-        print("did deactivate")
+        print("did deactivate \(self.transcript)")
+        self.transcript = ""
     }
     
     func didError(_ error: Error) {
@@ -71,7 +122,10 @@ extension SpeechController: SpeechEventListener {
     }
     
     func didRecognize(_ result: SpeechContext) {
+        
         print("didRecognize \(result.isSpeech) and transscript \(result.transcript)")
+        self.transcript = result.transcript
+        self.parse()
     }
     
     func didTimeout() {
@@ -80,6 +134,7 @@ extension SpeechController: SpeechEventListener {
 }
 
 extension SpeechController: PipelineDelegate {
+    
     func didInit() {
         print("didInit")
     }

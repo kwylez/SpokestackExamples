@@ -23,7 +23,13 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Initializers
     
-    init() {}
+    deinit {
+        speechController.delegate = nil
+    }
+    
+    init() {
+        speechController.delegate = self
+    }
     
     // MARK: Internal (methods)
     
@@ -35,7 +41,9 @@ class RSSViewModel: ObservableObject {
         self.speechController.stop()
     }
     
-    func load() -> Void {
+    // MARK: Private (methods)
+    
+    private func load() -> Void {
         
         let feedURL: URL = URL(string: self.feed)!
         let rssController: RSSController = RSSController(feedURL)
@@ -43,5 +51,13 @@ class RSSViewModel: ObservableObject {
         rssController.parseFeed({feedItems in
             self.feedItems = feedItems
         })
+    }
+}
+
+extension RSSViewModel: SpeechControllerDelegate {
+    
+    func didFindResult(_ text: String, controller: SpeechController) {
+        print("text \(text) and controller \(controller)")
+        self.load()
     }
 }
