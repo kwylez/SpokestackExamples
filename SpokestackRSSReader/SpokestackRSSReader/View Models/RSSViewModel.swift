@@ -21,20 +21,29 @@ class RSSViewModel: ObservableObject {
     
     private var speechController: SpeechController = SpeechController()
     
+    private var subscriptions = Set<AnyCancellable>()
+    
+    private let subscriber: SpeechControllerTranscriptSubscriber = SpeechControllerTranscriptSubscriber()
+    
     // MARK: Initializers
     
-    deinit {
-        speechController.delegate = nil
-    }
+    deinit {}
     
     init() {
-        speechController.delegate = self
+        speechController.subject.subscribe(self.subscriber)
     }
     
     // MARK: Internal (methods)
     
     func activatePipeline() -> Void {
+        
         self.speechController.start()
+        self.speechController.subject.sink( receiveCompletion: { completion in
+          print("Received completion (sink)", completion)
+        }, receiveValue: { [unowned self] value in
+            self.load()
+        })
+        .store(in: &self.subscriptions)
     }
     
     func deactivePipeline() -> Void {
@@ -54,10 +63,3 @@ class RSSViewModel: ObservableObject {
     }
 }
 
-extension RSSViewModel: SpeechControllerDelegate {
-    
-    func didFindResult(_ text: String, controller: SpeechController) {
-        print("text \(text) and controller \(controller)")
-        self.load()
-    }
-}

@@ -8,17 +8,33 @@
 
 import Foundation
 import Spokestack
+import Combine
 
-protocol SpeechControllerDelegate: class {
+final class SpeechControllerTranscriptSubscriber: Subscriber {
     
-    func didFindResult(_ text: String, controller: SpeechController) -> Void
+    typealias Input = String
+    typealias Failure = Never
+    
+    func receive(subscription: Subscription) {
+        subscription.request(.max(1))
+    }
+    
+    func receive(_ input: String) -> Subscribers.Demand {
+        
+        print("received on custom subscriber \(input)")
+        return .unlimited
+    }
+    
+    func receive(completion: Subscribers.Completion<Never>) {
+        print("completion in the subscriber")
+    }
 }
 
 final class SpeechController: NSObject {
     
     // MARK: Internal (properties)
     
-    weak var delegate: SpeechControllerDelegate?
+    let subject = PassthroughSubject<String, Never>()
     
     // MARK: Private (properties)
     
@@ -57,13 +73,16 @@ final class SpeechController: NSObject {
     }
     
     func stop() -> Void {
+        
         self.pipeline.stop()
+        self.subject.send(completion: .finished)
     }
     
     // MARK: Private (methods)
     
     private func parse() -> Void {
-//         Read my latest TechCrunch news
+
+        /// Read my latest TechCrunch news
 
         let pattern = #"""
         (read|what|mark \h as \h read).*(latest|oldest)\s(tech\s?crunch|cnn|seen \h the \h news)
@@ -84,12 +103,7 @@ final class SpeechController: NSObject {
                             
                             let range = result.range
                             let foundText = nsText.substring(with: range)
-
-                            print("found text \(foundText)")
-                            
-                            // TODO: User publisher / subscriber
-                            
-                            self.delegate?.didFindResult(foundText, controller: self)
+                            self.subject.send(foundText)
         }
     }
 }
