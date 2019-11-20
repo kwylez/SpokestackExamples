@@ -16,7 +16,7 @@ extension RSSFeed {
         var feedItems: Array<RSSFeedItem> = []
 
         self.items?.compactMap{ $0 }.forEach {rssFeedItem in
-            print("title \(rssFeedItem.title)")
+
             let title: String = rssFeedItem.title ?? "Title N/A"
             let link: String = rssFeedItem.link ?? "Link N/A"
             let description: String = rssFeedItem.description ?? "Description N/A"

@@ -24,7 +24,7 @@ struct RSSFeedTitleHeaderView: View {
               endPoint: .init(x: 0.5, y: 0.6)
             ))
             .cornerRadius(5)
-            Text("TechCruch")
+            Text("TechCrunch")
             .foregroundColor(.white)
             .font(.title)
             .fontWeight(.semibold)
