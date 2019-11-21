@@ -20,6 +20,7 @@
 		0134700E237FB07A00AD3588 /* FeedItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0134700D237FB07A00AD3588 /* FeedItemRow.swift */; };
 		017B2A5C2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017B2A5B2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift */; };
 		017B2A602382E84B004FA244 /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017B2A5F2382E84B004FA244 /* SpeechController.swift */; };
+		01A838C523862D5200989C87 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A838C423862D5200989C87 /* App.swift */; };
 		01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F538D82380781C00367C91 /* FeedKit+Extensions.swift */; };
 		D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */; };
 /* End PBXBuildFile section */
@@ -39,6 +40,7 @@
 		0134700D237FB07A00AD3588 /* FeedItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemRow.swift; sourceTree = "<group>"; };
 		017B2A5B2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedTitleHeaderView.swift; sourceTree = "<group>"; };
 		017B2A5F2382E84B004FA244 /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
+		01A838C423862D5200989C87 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		01F538D82380781C00367C91 /* FeedKit+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedKit+Extensions.swift"; sourceTree = "<group>"; };
 		1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpokestackRSSReader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71C186BE003D4E0DBE442724 /* Pods-SpokestackRSSReader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpokestackRSSReader.debug.xcconfig"; path = "Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader.debug.xcconfig"; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 			children = (
 				011D48ED237DB6E400EA951E /* Info.plist */,
 				011D48DF237DB6E200EA951E /* AppDelegate.swift */,
+				01A838C323862D4400989C87 /* Configs */,
 				01025B282380732D00809F88 /* Controllers */,
 				01F538D72380780800367C91 /* Extensions */,
 				01025B262380731300809F88 /* Models */,
@@ -143,6 +146,14 @@
 				011D48E8237DB6E400EA951E /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		01A838C323862D4400989C87 /* Configs */ = {
+			isa = PBXGroup;
+			children = (
+				01A838C423862D5200989C87 /* App.swift */,
+			);
+			path = Configs;
 			sourceTree = "<group>";
 		};
 		01F538D72380780800367C91 /* Extensions */ = {
@@ -275,6 +286,7 @@
 			files = (
 				011D48E0237DB6E200EA951E /* AppDelegate.swift in Sources */,
 				017B2A5C2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift in Sources */,
+				01A838C523862D5200989C87 /* App.swift in Sources */,
 				01347006237F5E2700AD3588 /* RSSViewModel.swift in Sources */,
 				01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */,
 				0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */,
