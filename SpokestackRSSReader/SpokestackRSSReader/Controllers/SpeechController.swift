@@ -9,6 +9,7 @@
 import Foundation
 import Spokestack
 import Combine
+import AVFoundation
 
 final class SpeechControllerTranscriptSubscriber: Subscriber {
     
@@ -38,6 +39,8 @@ final class SpeechController: NSObject {
     
     // MARK: Private (properties)
     
+    private let avSpeechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
+    
     private var transcript: String = "" {
         
         didSet {
@@ -64,6 +67,7 @@ final class SpeechController: NSObject {
     
     override init() {
         super.init()
+        avSpeechSynthesizer.delegate = self
     }
     
     // MARK: Internal (methods)
@@ -78,11 +82,15 @@ final class SpeechController: NSObject {
         self.subject.send(completion: .finished)
     }
     
+    func respond(_ text: String) -> Void {
+        
+        let utterance = AVSpeechUtterance(string: text)
+        avSpeechSynthesizer.speak(utterance)
+    }
+    
     // MARK: Private (methods)
     
     private func parse() -> Void {
-
-        /// Read my latest TechCrunch news
 
         let pattern = #"""
         (read|what|mark \h as \h read).*(latest|oldest)\s(tech\s?crunch|cnn|seen \h the \h news)
@@ -94,7 +102,7 @@ final class SpeechController: NSObject {
         
         let nsrange: NSRange = NSRange(self.transcript.startIndex..<self.transcript.endIndex, in: self.transcript)
         let nsText: NSString = self.transcript as NSString
-        
+        var utterance: String = ""
         regex.enumerateMatches(in: self.transcript, options: [], range: nsrange) { result, flags, stop in
                             
                             guard let result = result else {
@@ -103,8 +111,41 @@ final class SpeechController: NSObject {
                             
                             let range = result.range
                             let foundText = nsText.substring(with: range)
-                            self.subject.send(foundText)
+                            print("about to stop \(foundText)")
+                            utterance = foundText
+                            stop.pointee = true
         }
+        
+        self.subject.send(utterance)
+        self.subject.send(completion: .finished)
+        print("all at the end")
+    }
+}
+
+extension SpeechController: AVSpeechSynthesizerDelegate {
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+        print("sp did start \(utterance)")
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        print("sp did finish \(utterance)")
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
+        print("sp did pause \(utterance)")
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
+        print("sp did continue \(utterance)")
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
+        print("sp did cancel \(utterance)")
+    }
+    
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
+        print("sp willSpeakRangeOfSpeechString \(utterance)")
     }
 }
 
