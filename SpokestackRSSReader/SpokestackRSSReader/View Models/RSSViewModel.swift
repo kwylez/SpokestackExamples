@@ -8,12 +8,11 @@
 
 import Foundation
 import Combine
+import AVFoundation
 
 class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
-    
-    var feed: String = "https://feeds.feedburner.com/TechCrunch/"
     
     @Published private (set) var feedItems: Array<RSSFeedItem> = []
     
@@ -27,8 +26,6 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Initializers
     
-    deinit {}
-    
     init() {
         speechController.subject.subscribe(self.subscriber)
     }
@@ -36,11 +33,14 @@ class RSSViewModel: ObservableObject {
     // MARK: Internal (methods)
     
     func activatePipeline() -> Void {
-        
+
         self.speechController.start()
-        self.speechController.subject.sink( receiveCompletion: { completion in
-          print("Received completion (sink)", completion)
+        self.speechController.subject.sink( receiveCompletion: { [unowned self] completion in
+
+            self.speechController.stop()
+
         }, receiveValue: { [unowned self] value in
+            
             self.load()
         })
         .store(in: &self.subscriptions)
@@ -54,12 +54,20 @@ class RSSViewModel: ObservableObject {
     
     private func load() -> Void {
         
-        let feedURL: URL = URL(string: self.feed)!
+        let feedURL: URL = URL(string: App.Feed.feedURL)!
         let rssController: RSSController = RSSController(feedURL)
         
         rssController.parseFeed({feedItems in
             self.feedItems = feedItems
+            self.processSpeech()
         })
+    }
+    
+    private func processSpeech() -> Void {
+
+        self.feedItems.forEach {
+            self.speechController.respond($0.title)
+        }
     }
 }
 
