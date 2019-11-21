@@ -10,10 +10,10 @@ import Foundation
 
 struct App {
     
+    static let title: String = "Spokestack Demo"
+    
     struct Feed {
         
         static let feedURL: String = "https://feeds.feedburner.com/TechCrunch/"
-        
-        static let feedTitle: String = "TechCrunch"
     }
 }
