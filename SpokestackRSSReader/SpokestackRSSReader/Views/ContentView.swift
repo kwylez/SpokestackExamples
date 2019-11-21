@@ -33,7 +33,7 @@ struct ContentView: View {
             }.onDisappear() {
                 self.viewModel.deactivePipeline()
             }
-            .navigationBarTitle("Spokestack RSS Reader")
+            .navigationBarTitle(App.title)
         }
     }
 }
