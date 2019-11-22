@@ -11,6 +11,12 @@ import Spokestack
 import Combine
 import AVFoundation
 
+extension AVPlayer {
+    var isPlaying: Bool {
+        return rate != 0 && error == nil
+    }
+}
+
 final class SpeechControllerTranscriptSubscriber: Subscriber {
     
     typealias Input = String
@@ -41,6 +47,12 @@ final class SpeechController: NSObject {
     
     private let avSpeechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
     
+    private var streamURLs: Array<URL> = []
+    
+    private let player: AVQueuePlayer = AVQueuePlayer()
+    
+    private var tts: TextToSpeech?
+    
     private var transcript: String = "" {
         
         didSet {
@@ -66,8 +78,14 @@ final class SpeechController: NSObject {
     }
     
     override init() {
+        
         super.init()
+        
         avSpeechSynthesizer.delegate = self
+        
+        let config: SpeechConfiguration = SpeechConfiguration()
+        config.tracing = .NONE
+        tts = TextToSpeech(self, configuration: config)
     }
     
     // MARK: Internal (methods)
@@ -86,6 +104,9 @@ final class SpeechController: NSObject {
         
         let utterance = AVSpeechUtterance(string: text)
         avSpeechSynthesizer.speak(utterance)
+//        let input = TextToSpeechInput(text)
+//        print("what is my latest input \(input.input)")
+//        self.tts?.synthesize(input)
     }
     
     // MARK: Private (methods)
@@ -111,14 +132,30 @@ final class SpeechController: NSObject {
                             
                             let range = result.range
                             let foundText = nsText.substring(with: range)
-                            print("about to stop \(foundText)")
+
                             utterance = foundText
                             stop.pointee = true
         }
         
         self.subject.send(utterance)
         self.subject.send(completion: .finished)
-        print("all at the end")
+    }
+    
+    private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
+        
+        if self.player.items().isEmpty {
+            
+            self.player.insert(playerItem, after: nil)
+
+        } else {
+            
+            let lastItem: AVPlayerItem? = self.player.items().last
+            self.player.insert(playerItem, after: lastItem)
+        }
+        
+        if !self.player.isPlaying {
+            self.player.play()
+        }
     }
 }
 
@@ -196,5 +233,21 @@ extension SpeechController: PipelineDelegate {
     
     func setupFailed(_ error: String) {
         print("error \(error)")
+    }
+}
+
+extension SpeechController: TextToSpeechDelegate {
+    
+    func success(url: URL) {
+//        self.streamingFile = url
+        let playerItem = AVPlayerItem(url: url)
+        self.playOrQueueIfNecessary(playerItem)
+
+//        self.player = AVPlayer(playerItem: playerItem)
+//        self.player?.play()
+    }
+    
+    func failure(error: Error) {
+        print(error)
     }
 }
