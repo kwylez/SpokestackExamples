@@ -33,17 +33,19 @@ class RSSViewModel: ObservableObject {
     // MARK: Internal (methods)
     
     func activatePipeline() -> Void {
+        
+        self.load()
 
-        self.speechController.start()
-        self.speechController.subject.sink( receiveCompletion: { [unowned self] completion in
-
-            self.speechController.stop()
-
-        }, receiveValue: { [unowned self] value in
-            
-            self.load()
-        })
-        .store(in: &self.subscriptions)
+//        self.speechController.start()
+//        self.speechController.subject.sink( receiveCompletion: { [unowned self] completion in
+//
+//            self.speechController.stop()
+//
+//        }, receiveValue: { [unowned self] value in
+//
+//            self.load()
+//        })
+//        .store(in: &self.subscriptions)
     }
     
     func deactivePipeline() -> Void {
@@ -59,7 +61,7 @@ class RSSViewModel: ObservableObject {
         
         rssController.parseFeed({feedItems in
             self.feedItems = feedItems
-            self.processSpeech()
+//            self.processSpeech()
         })
     }
     

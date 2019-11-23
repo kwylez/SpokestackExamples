@@ -20,15 +20,15 @@ struct ContentView: View {
         NavigationView {
 
             VStack(alignment: .center, spacing: 0.0) {
-                RSSFeedTitleHeaderView().frame(width: UIScreen.main.bounds.size.width * 0.95, height: 120.0)
                 List {
                     ForEach(self.viewModel.feedItems) { item in
-                        FeedItemRow(feedItem: item)
+                        FeedCardView(feedItem: item)
                     }
                 }
                 Spacer()
             }
             .onAppear{
+                UITableView.appearance().separatorStyle = .none
                 self.viewModel.activatePipeline()
             }.onDisappear() {
                 self.viewModel.deactivePipeline()
