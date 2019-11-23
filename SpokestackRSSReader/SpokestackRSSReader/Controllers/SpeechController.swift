@@ -102,11 +102,11 @@ final class SpeechController: NSObject {
     
     func respond(_ text: String) -> Void {
         
-        let utterance = AVSpeechUtterance(string: text)
-        avSpeechSynthesizer.speak(utterance)
-//        let input = TextToSpeechInput(text)
-//        print("what is my latest input \(input.input)")
-//        self.tts?.synthesize(input)
+//        let utterance = AVSpeechUtterance(string: text)
+//        avSpeechSynthesizer.speak(utterance)
+        let input = TextToSpeechInput(text)
+        print("what is my latest input \(input.input)")
+        self.tts?.synthesize(input)
     }
     
     // MARK: Private (methods)
