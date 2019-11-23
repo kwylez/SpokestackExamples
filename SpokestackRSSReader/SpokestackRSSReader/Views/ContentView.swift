@@ -17,24 +17,21 @@ struct ContentView: View {
     
     var body: some View {
         
-        NavigationView {
+        VStack(alignment: .leading, spacing: 0.0) {
+            
+            ZStack {
+    
+                    Rectangle()
+                        .foregroundColor(Color("Blue"))
+                    Text("TechCrunch")
+                        .fontWeight(.bold)
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                        .padding(.top, 30.0)
 
-            VStack(alignment: .center, spacing: 0.0) {
-                List {
-                    ForEach(self.viewModel.feedItems) { item in
-                        FeedCardView(feedItem: item)
-                    }
-                }
-                Spacer()
-            }
-            .onAppear{
-                UITableView.appearance().separatorStyle = .none
-                self.viewModel.activatePipeline()
-            }.onDisappear() {
-                self.viewModel.deactivePipeline()
-            }
-            .navigationBarTitle(App.title)
-        }
+            }.frame(height: 125.0)
+            Rectangle().foregroundColor(Color("Gray"))
+        }.edgesIgnoringSafeArea(.all)
     }
 }
 
