@@ -13,21 +13,26 @@ struct FeedCardView: View {
     var feedItem: RSSFeedItem
     
     var body: some View {
-        
+
         VStack {
             HStack {
-                Image("default-headline-image").padding(.trailing, 10.0)
-                Text("\(feedItem.title)")
+                Image("default-headline-image")
+                    .padding([.leading, .trailing], 10.0)
+                Text("\(self.feedItem.title)")
                     .font(.headline)
                     .fontWeight(.bold)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(nil)
                 Spacer()
-            }.padding([.leading, .trailing], 10.0)
+            }
+            .padding([.leading, .trailing], 10.0)
             FeedCardViewDivider()
             HStack {
                 Button(action: {}) {
-                    Text("\"Tell me more\"").fontWeight(.bold)
+                    Text("\"Tell me more\"")
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("Blue"))
                 }
                 .padding([.leading, .trailing], 20.0)
                 Rectangle()
@@ -36,15 +41,18 @@ struct FeedCardView: View {
                 .padding([.leading, .trailing], 10.0)
                 Spacer()
                 Button(action: {}) {
-                    Text("See It").fontWeight(.bold)
+                    Text("See It")
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("Blue"))
                 }
                 .padding([.leading, .trailing], 10.0)
                 Spacer()
-            }.padding()
+            }
+            .padding()
         }
-        .frame(width: 375, height: 175)
         .background(Color.white)
         .cornerRadius(10.0)
+        .shadow(color: Color.gray.opacity(0.4), radius: 5.0)
     }
 }
 

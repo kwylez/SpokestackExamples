@@ -11,6 +11,8 @@ import Spokestack
 import FeedKit
 import Combine
 
+fileprivate let BackgroundColor: UIColor = UIColor(red: 246/255, green: 249/255, blue: 252/255, alpha: 1.0)
+
 struct ContentView: View {
     
     @ObservedObject var viewModel: RSSViewModel = RSSViewModel()
@@ -32,43 +34,39 @@ struct ContentView: View {
     ]
     
     var body: some View {
-        
-        VStack(alignment: .leading, spacing: 0.0) {
-            
-            ZStack {
     
-                Rectangle()
-                    .foregroundColor(Color("Blue"))
-                Text("TechCrunch")
-                    .fontWeight(.bold)
-                    .font(.largeTitle)
-                    .foregroundColor(.white)
-                    .padding(.top, 30.0)
-
-            }.frame(height: 125.0)
-            ZStack {
+        GeometryReader { reader in
+        
+            VStack(alignment: .leading, spacing: 0.0) {
                 
-                Rectangle().foregroundColor(Color("Gray"))
-                ScrollView {
-                    Spacer()
-                    Spacer()
-                    VStack {
-                        ForEach(items) { item in
-                            Group {
-                                FeedCardView(feedItem: item)
-                            }
-                        }
-                    }
-                    Spacer()
+                ZStack {
+        
+                    Rectangle()
+                        .foregroundColor(Color("Blue"))
+                    Text("TechCrunch")
+                        .fontWeight(.bold)
+                        .font(.largeTitle)
+                        .foregroundColor(.white)
+                        .padding(.top, 30.0)
+
+                }
+                .frame(height: 125.0)
+                List (self.viewModel.feedItems, id: \.title){item in
+                    FeedCardView(feedItem: item)
                 }
                 .onAppear{
+                    
                     UITableView.appearance().separatorStyle = .none
+                    UITableView.appearance().backgroundColor = BackgroundColor
+                    UITableViewCell.appearance().backgroundColor = BackgroundColor
+                    
                     self.viewModel.activatePipeline()
+
                 }.onDisappear() {
                     self.viewModel.deactivePipeline()
                 }
-            }
-        }.edgesIgnoringSafeArea(.all)
+            }.edgesIgnoringSafeArea(.all)
+        }
     }
 }
 
