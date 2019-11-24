@@ -14,7 +14,23 @@ import Combine
 struct ContentView: View {
     
     @ObservedObject var viewModel: RSSViewModel = RSSViewModel()
-                    let item = RSSFeedItem(title: "Hello", link: "link", description: "my description")
+    
+    let items = [
+        RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello1", link: "link1", description: "my description1"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello1", link: "link1", description: "my description1"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
+        RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "link", description: "my description"),
+    ]
+    
     var body: some View {
         
         VStack(alignment: .leading, spacing: 0.0) {
@@ -31,17 +47,20 @@ struct ContentView: View {
 
             }.frame(height: 125.0)
             ZStack {
+                
                 Rectangle().foregroundColor(Color("Gray"))
-
-                VStack(alignment: .center, spacing: 15.0) {
-                    List {
-                        ForEach(self.viewModel.feedItems) { item in
-                            FeedCardView(feedItem: item)
+                ScrollView {
+                    Spacer()
+                    Spacer()
+                    VStack {
+                        ForEach(items) { item in
+                            Group {
+                                FeedCardView(feedItem: item)
+                            }
                         }
                     }
                     Spacer()
                 }
-                .frame(width: UIScreen.main.bounds.width * 0.95)
                 .onAppear{
                     UITableView.appearance().separatorStyle = .none
                     self.viewModel.activatePipeline()

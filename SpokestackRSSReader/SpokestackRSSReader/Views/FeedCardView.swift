@@ -16,8 +16,7 @@ struct FeedCardView: View {
         
         VStack {
             HStack {
-                Spacer()
-                Image("default-headline-image")
+                Image("default-headline-image").padding(.trailing, 10.0)
                 Text("\(feedItem.title)")
                     .font(.headline)
                     .fontWeight(.bold)
@@ -27,17 +26,25 @@ struct FeedCardView: View {
             }.padding([.leading, .trailing], 10.0)
             FeedCardViewDivider()
             HStack {
-                Spacer()
                 Button(action: {}) {
-                    Text("Tell me more").fontWeight(.bold)
+                    Text("\"Tell me more\"").fontWeight(.bold)
                 }
+                .padding([.leading, .trailing], 20.0)
+                Rectangle()
+                .fill(Color("Gray"))
+                .frame(width: 1)
+                .padding([.leading, .trailing], 10.0)
                 Spacer()
                 Button(action: {}) {
                     Text("See It").fontWeight(.bold)
                 }
+                .padding([.leading, .trailing], 10.0)
                 Spacer()
             }.padding()
         }
+        .frame(width: 375, height: 175)
+        .background(Color.white)
+        .cornerRadius(10.0)
     }
 }
 

@@ -20,7 +20,6 @@
 		0134700E237FB07A00AD3588 /* FeedItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0134700D237FB07A00AD3588 /* FeedItemRow.swift */; };
 		0174EBE12389AF3900A7EAA7 /* FeedCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */; };
 		0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */; };
-		017B2A5C2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017B2A5B2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift */; };
 		017B2A602382E84B004FA244 /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017B2A5F2382E84B004FA244 /* SpeechController.swift */; };
 		01A838C523862D5200989C87 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A838C423862D5200989C87 /* App.swift */; };
 		01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F538D82380781C00367C91 /* FeedKit+Extensions.swift */; };
@@ -42,7 +41,6 @@
 		0134700D237FB07A00AD3588 /* FeedItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItemRow.swift; sourceTree = "<group>"; };
 		0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCardView.swift; sourceTree = "<group>"; };
 		0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCardViewDivider.swift; sourceTree = "<group>"; };
-		017B2A5B2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedTitleHeaderView.swift; sourceTree = "<group>"; };
 		017B2A5F2382E84B004FA244 /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
 		01A838C423862D5200989C87 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		01F538D82380781C00367C91 /* FeedKit+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedKit+Extensions.swift"; sourceTree = "<group>"; };
@@ -80,7 +78,6 @@
 				0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */,
 				0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */,
 				0134700D237FB07A00AD3588 /* FeedItemRow.swift */,
-				017B2A5B2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift */,
 				011D48E1237DB6E200EA951E /* SceneDelegate.swift */,
 			);
 			path = Views;
@@ -291,7 +288,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				011D48E0237DB6E200EA951E /* AppDelegate.swift in Sources */,
-				017B2A5C2382DF7E004FA244 /* RSSFeedTitleHeaderView.swift in Sources */,
 				01A838C523862D5200989C87 /* App.swift in Sources */,
 				01347006237F5E2700AD3588 /* RSSViewModel.swift in Sources */,
 				01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */,

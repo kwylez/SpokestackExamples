@@ -11,7 +11,7 @@ import SwiftUI
 struct FeedCardViewDivider: View {
     var body: some View {
         Rectangle()
-        .fill(Color(UIColor.lightGray))
+        .fill(Color("Gray"))
         .frame(height: 1)
     }
 }
