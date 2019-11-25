@@ -22,6 +22,8 @@
 		0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */; };
 		017B2A602382E84B004FA244 /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017B2A5F2382E84B004FA244 /* SpeechController.swift */; };
 		01A838C523862D5200989C87 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A838C423862D5200989C87 /* App.swift */; };
+		01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */; };
+		01DF9698238C751400DC3A83 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DF9697238C751400DC3A83 /* SafariView.swift */; };
 		01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F538D82380781C00367C91 /* FeedKit+Extensions.swift */; };
 		D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */; };
 /* End PBXBuildFile section */
@@ -43,6 +45,8 @@
 		0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCardViewDivider.swift; sourceTree = "<group>"; };
 		017B2A5F2382E84B004FA244 /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
 		01A838C423862D5200989C87 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSafariViewController.swift; sourceTree = "<group>"; };
+		01DF9697238C751400DC3A83 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		01F538D82380781C00367C91 /* FeedKit+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedKit+Extensions.swift"; sourceTree = "<group>"; };
 		1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpokestackRSSReader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71C186BE003D4E0DBE442724 /* Pods-SpokestackRSSReader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpokestackRSSReader.debug.xcconfig"; path = "Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader.debug.xcconfig"; sourceTree = "<group>"; };
@@ -78,6 +82,7 @@
 				0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */,
 				0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */,
 				0134700D237FB07A00AD3588 /* FeedItemRow.swift */,
+				01DF9697238C751400DC3A83 /* SafariView.swift */,
 				011D48E1237DB6E200EA951E /* SceneDelegate.swift */,
 			);
 			path = Views;
@@ -129,14 +134,15 @@
 		011D48DE237DB6E200EA951E /* SpokestackRSSReader */ = {
 			isa = PBXGroup;
 			children = (
-				011D48ED237DB6E400EA951E /* Info.plist */,
 				011D48DF237DB6E200EA951E /* AppDelegate.swift */,
 				01A838C323862D4400989C87 /* Configs */,
 				01025B282380732D00809F88 /* Controllers */,
 				01F538D72380780800367C91 /* Extensions */,
+				011D48ED237DB6E400EA951E /* Info.plist */,
 				01025B262380731300809F88 /* Models */,
 				011D48E7237DB6E400EA951E /* Preview Content */,
 				01025B23238072A300809F88 /* UI */,
+				01DF9694238C748600DC3A83 /* View Controllers */,
 				01025B272380731B00809F88 /* View Models */,
 				01025B252380730200809F88 /* Views */,
 			);
@@ -157,6 +163,14 @@
 				01A838C423862D5200989C87 /* App.swift */,
 			);
 			path = Configs;
+			sourceTree = "<group>";
+		};
+		01DF9694238C748600DC3A83 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */,
+			);
+			path = "View Controllers";
 			sourceTree = "<group>";
 		};
 		01F538D72380780800367C91 /* Extensions */ = {
@@ -293,9 +307,11 @@
 				01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */,
 				0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */,
 				0174EBE12389AF3900A7EAA7 /* FeedCardView.swift in Sources */,
+				01DF9698238C751400DC3A83 /* SafariView.swift in Sources */,
 				0134700E237FB07A00AD3588 /* FeedItemRow.swift in Sources */,
 				011D48E2237DB6E200EA951E /* SceneDelegate.swift in Sources */,
 				01347008237F5E2E00AD3588 /* RSSController.swift in Sources */,
+				01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */,
 				011D48E4237DB6E200EA951E /* ContentView.swift in Sources */,
 				0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */,
 				017B2A602382E84B004FA244 /* SpeechController.swift in Sources */,
