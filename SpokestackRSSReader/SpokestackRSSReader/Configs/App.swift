@@ -9,10 +9,14 @@
 import Foundation
 
 struct App {
+
+    static let welcomeMessage: String = "Welcoem to the latest TechCrunch Headlines"
     
-    static let title: String = "Spokestack Demo"
+    static let actionDelay: Float = 1.5
     
     struct Feed {
+        
+        static let heading: String = "TechCrunch"
         
         static let feedURL: String = "https://feeds.feedburner.com/TechCrunch/"
     }

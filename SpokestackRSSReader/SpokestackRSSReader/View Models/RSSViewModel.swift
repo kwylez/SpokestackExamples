@@ -24,6 +24,8 @@ class RSSViewModel: ObservableObject {
     
     private let subscriber: SpeechControllerTranscriptSubscriber = SpeechControllerTranscriptSubscriber()
     
+    private var shouldAnnounceWelcome: Bool = true
+    
     // MARK: Initializers
     
     init() {
@@ -32,7 +34,17 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Internal (methods)
     
+    func readArticleDescription(_ description: String) -> Void {
+        self.speechController.respond(description)
+    }
+    
     func activatePipeline() -> Void {
+        
+        if self.shouldAnnounceWelcome {
+            
+            self.speechController.respond(App.welcomeMessage)
+            self.shouldAnnounceWelcome.toggle()
+        }
         
         self.load()
 
@@ -61,7 +73,6 @@ class RSSViewModel: ObservableObject {
         
         rssController.parseFeed({feedItems in
             self.feedItems = feedItems
-//            self.processSpeech()
         })
     }
     

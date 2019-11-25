@@ -8,9 +8,18 @@
 
 import SwiftUI
 
+typealias FeedCardTellMoreCallback = (_ feedItem: RSSFeedItem) -> Void
+typealias FeedCardSeeMoreCallback = (_ url: URL) -> Void
+
 struct FeedCardView: View {
     
+    // MARK: Internal (properties)
+    
     var feedItem: RSSFeedItem
+    
+    var tellMoreCallback: FeedCardTellMoreCallback?
+    
+    var seeMoreCallback: FeedCardSeeMoreCallback?
     
     var body: some View {
 
@@ -29,23 +38,28 @@ struct FeedCardView: View {
             .padding([.leading, .trailing], 10.0)
             FeedCardViewDivider()
             HStack {
-                Button(action: {}) {
-                    Text("\"Tell me more\"")
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("Blue"))
-                }
+                Text("\"Tell me more\"")
+                .fontWeight(.bold)
+                .foregroundColor(Color("Blue"))
                 .padding([.leading, .trailing], 20.0)
+                .onTapGesture {
+                    self.tellMoreCallback?(self.feedItem)
+                }
                 Rectangle()
                 .fill(Color("Gray"))
                 .frame(width: 1)
                 .padding([.leading, .trailing], 10.0)
                 Spacer()
-                Button(action: {}) {
-                    Text("See It")
-                        .fontWeight(.bold)
-                        .foregroundColor(Color("Blue"))
-                }
+                Text("See It")
+                .fontWeight(.bold)
+                .foregroundColor(Color("Blue"))
                 .padding([.leading, .trailing], 10.0)
+                .onTapGesture {
+
+                    if let url: URL = URL(string: self.feedItem.link) {
+                        self.seeMoreCallback?(url)
+                    }
+                }
                 Spacer()
             }
             .padding()
