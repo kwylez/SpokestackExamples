@@ -12,61 +12,43 @@ import FeedKit
 import Combine
 
 fileprivate let BackgroundColor: UIColor = UIColor(red: 246/255, green: 249/255, blue: 252/255, alpha: 1.0)
+fileprivate let NavigationBarBackgroundColor: UIColor = UIColor(red: 47/255, green: 91/255, blue: 234/255, alpha: 1.0)
 
 struct ContentView: View {
     
     @ObservedObject var viewModel: RSSViewModel = RSSViewModel()
     
-    let items = [
-        RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello1", link: "link1", description: "my description1"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello1", link: "link1", description: "my description1"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "Hello", link: "link", description: "my description"),
-        RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "link", description: "my description"),
-    ]
-    
     var body: some View {
     
-        GeometryReader { reader in
-        
-            VStack(alignment: .leading, spacing: 0.0) {
-                
-                ZStack {
-        
-                    Rectangle()
-                        .foregroundColor(Color("Blue"))
-                    Text("TechCrunch")
-                        .fontWeight(.bold)
-                        .font(.largeTitle)
-                        .foregroundColor(.white)
-                        .padding(.top, 30.0)
-
-                }
-                .frame(height: 125.0)
-                List (self.viewModel.feedItems, id: \.title){item in
-                    FeedCardView(feedItem: item)
-                }
-                .onAppear{
-                    
-                    UITableView.appearance().separatorStyle = .none
-                    UITableView.appearance().backgroundColor = BackgroundColor
-                    UITableViewCell.appearance().backgroundColor = BackgroundColor
-                    
-                    self.viewModel.activatePipeline()
-
-                }.onDisappear() {
-                    self.viewModel.deactivePipeline()
-                }
-            }.edgesIgnoringSafeArea(.all)
+        NavigationView {
+            
+            List (self.viewModel.feedItems, id: \.title){item in
+                FeedCardView(feedItem: item)
+            }
+            .onAppear{
+                self.viewModel.activatePipeline()
+            }.onDisappear() {
+                self.viewModel.deactivePipeline()
+            }
+            .navigationBarTitle("TechCrunch", displayMode: .inline)
         }
+    }
+    
+    init() {
+        
+        UITableView.appearance().separatorStyle = .none
+        UITableView.appearance().backgroundColor = BackgroundColor
+        UITableViewCell.appearance().backgroundColor = BackgroundColor
+                
+        UINavigationBar.appearance().backgroundColor = NavigationBarBackgroundColor
+        UINavigationBar.appearance().shadowImage = UIImage()
+        UINavigationBar.appearance().barTintColor = NavigationBarBackgroundColor
+        UINavigationBar.appearance().titleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.white
+        ]
+        UINavigationBar.appearance().largeTitleTextAttributes = [
+            NSAttributedString.Key.foregroundColor: UIColor.white
+        ]
     }
 }
 
