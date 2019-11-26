@@ -24,7 +24,7 @@ struct FeedCardView: View {
     var body: some View {
 
         VStack {
-            HStack {
+            HStack(alignment: .top) {
                 Image("default-headline-image")
                     .padding([.leading, .trailing], 10.0)
                 Text("\(self.feedItem.title)")
@@ -35,7 +35,7 @@ struct FeedCardView: View {
                     .lineLimit(nil)
                 Spacer()
             }
-            .padding([.leading, .trailing], 10.0)
+            .padding([.leading, .trailing, .top], 10.0)
             FeedCardViewDivider()
             HStack {
                 Text("\"Tell me more\"")
