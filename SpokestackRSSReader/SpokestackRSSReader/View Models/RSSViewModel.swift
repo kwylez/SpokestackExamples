@@ -14,7 +14,12 @@ class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
     
-    @Published private (set) var feedItems: Array<RSSFeedItem> = []
+    @Published private (set) var feedItems: Array<RSSFeedItem> = [] {
+        
+        didSet {
+            self.queuedItems = feedItems
+        }
+    }
     
     // MARK: Private (properties)
     
@@ -22,28 +27,53 @@ class RSSViewModel: ObservableObject {
     
     private var subscriptions = Set<AnyCancellable>()
     
-    private let subscriber: SpeechControllerTranscriptSubscriber = SpeechControllerTranscriptSubscriber()
+    private var shouldAnnounceWelcome: Bool = true {
+        
+        didSet {
+            
+            if !shouldAnnounceWelcome {
+    
+                if !self.feedItems.isEmpty {
+                    self.processHeadlines()
+                }
+            }
+        }
+    }
+    
+    private var queuedItems: Array<RSSFeedItem> = []
     
     // MARK: Initializers
     
-    init() {
-        speechController.subject.subscribe(self.subscriber)
-    }
+    init() {}
     
     // MARK: Internal (methods)
     
+    func readArticleDescription(_ description: String) -> Void {
+        self.speechController.respond(description)
+    }
+    
     func activatePipeline() -> Void {
-
-        self.speechController.start()
-        self.speechController.subject.sink( receiveCompletion: { [unowned self] completion in
-
-            self.speechController.stop()
-
-        }, receiveValue: { [unowned self] value in
+        
+        if self.shouldAnnounceWelcome {
+            
+            self.speechController.respond(App.welcomeMessage)
+            self.load()
+            
+        } else {
             
             self.load()
-        })
-        .store(in: &self.subscriptions)
+        }
+
+//        self.speechController.start()
+//        self.speechController.textPublisher.sink( receiveCompletion: { [unowned self] completion in
+//
+//            self.speechController.stop()
+//
+//        }, receiveValue: { [unowned self] value in
+//
+//            self.load()
+//        })
+//        .store(in: &self.subscriptions)
     }
     
     func deactivePipeline() -> Void {
@@ -59,7 +89,7 @@ class RSSViewModel: ObservableObject {
         
         rssController.parseFeed({feedItems in
             self.feedItems = feedItems
-            self.processSpeech()
+            self.shouldAnnounceWelcome.toggle()
         })
     }
     
@@ -68,6 +98,47 @@ class RSSViewModel: ObservableObject {
         self.feedItems.forEach {
             self.speechController.respond($0.title)
         }
+    }
+    
+    private func processHeadlines() -> Void {
+        
+        self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
+            
+            if self.feedItems.count == self.queuedItems.count {
+                
+                if let item: RSSFeedItem = self.queuedItems.first {
+
+                    self.queuedItems.remove(at: 0)
+                    self.speechController.respond(item.title)
+                }
+                
+            } else if !self.queuedItems.isEmpty {
+             
+                if let nextItem: RSSFeedItem = self.queuedItems.first {
+
+                    self.queuedItems.remove(at: 0)
+                    self.speechController.respond(nextItem.title)
+                }
+
+            } else {
+
+                /// All items have been read so shut everything down: TBD
+            }
+            
+        }).store(in: &self.subscriptions)
+        
+        /// Read article after 1.5 seconds
+        ///
+        /// Should timer be instance var with no auto connect?
+        /// That way after an item has finished, Start a new timer, active ASR, if found, then cancel timer, read description, shut down ASR  and then continue
+        
+//        let cancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
+//        .autoconnect()
+//        .sink { receivedTimeStamp in
+//            print("passed through: ", receivedTimeStamp)
+//        }
+//
+//        cancellable.store(in: &self.subscriptions)
     }
 }
 

@@ -41,17 +41,21 @@ final class SpeechController: NSObject {
     
     // MARK: Internal (properties)
     
-    let subject = PassthroughSubject<String, Never>()
+    let textPublisher = PassthroughSubject<String, Never>()
+    
+    let itemFinishedPublisher = PassthroughSubject<String, Never>()
     
     // MARK: Private (properties)
     
+    private var subscriptions = Set<AnyCancellable>()
+    
     private let avSpeechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
     
-    private var streamURLs: Array<URL> = []
-    
-    private let player: AVQueuePlayer = AVQueuePlayer()
+    private var player: AVPlayer = AVPlayer()
     
     private var tts: TextToSpeech?
+    
+    private var queued: Array<AVPlayerItem> = []
     
     private var transcript: String = "" {
         
@@ -97,13 +101,11 @@ final class SpeechController: NSObject {
     func stop() -> Void {
         
         self.pipeline.stop()
-        self.subject.send(completion: .finished)
+        self.textPublisher.send(completion: .finished)
     }
     
     func respond(_ text: String) -> Void {
-        
-//        let utterance = AVSpeechUtterance(string: text)
-//        avSpeechSynthesizer.speak(utterance)
+
         let input = TextToSpeechInput(text)
         print("what is my latest input \(input.input)")
         self.tts?.synthesize(input)
@@ -137,25 +139,34 @@ final class SpeechController: NSObject {
                             stop.pointee = true
         }
         
-        self.subject.send(utterance)
-        self.subject.send(completion: .finished)
+        self.textPublisher.send(utterance)
+        self.textPublisher.send(completion: .finished)
     }
     
     private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
         
-        if self.player.items().isEmpty {
-            
-            self.player.insert(playerItem, after: nil)
-
-        } else {
-            
-            let lastItem: AVPlayerItem? = self.player.items().last
-            self.player.insert(playerItem, after: lastItem)
-        }
+        self.player = AVPlayer(playerItem: playerItem)
+        self.player.play()
+        self.listenToNotification(playerItem)
+    }
+    
+    private func listenToNotification(_ playerItem: AVPlayerItem) -> Void {
         
-        if !self.player.isPlaying {
-            self.player.play()
-        }
+        let _ = NotificationCenter.default
+            .publisher(for: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
+            .sink(
+                receiveCompletion: {_ in },
+                receiveValue: { value in
+                    
+                    print("what is my value \(value)")
+                    
+                    /// Need to send something more relevant or just letting subscriber know it is finished
+                    /// You can't just send the status or you'll only receive one value
+
+                    self.itemFinishedPublisher.send("finished")
+                }
+            )
+            .store(in: &self.subscriptions)
     }
 }
 
@@ -239,12 +250,9 @@ extension SpeechController: PipelineDelegate {
 extension SpeechController: TextToSpeechDelegate {
     
     func success(url: URL) {
-//        self.streamingFile = url
+
         let playerItem = AVPlayerItem(url: url)
         self.playOrQueueIfNecessary(playerItem)
-
-//        self.player = AVPlayer(playerItem: playerItem)
-//        self.player?.play()
     }
     
     func failure(error: Error) {
