@@ -21,6 +21,8 @@ class RSSViewModel: ObservableObject {
         }
     }
     
+    @Published private (set) var currentItem: RSSFeedItem?
+    
     // MARK: Private (properties)
     
     private var speechController: SpeechController = SpeechController()
@@ -109,6 +111,7 @@ class RSSViewModel: ObservableObject {
                 if let item: RSSFeedItem = self.queuedItems.first {
 
                     self.queuedItems.remove(at: 0)
+                    self.currentItem = item
                     self.speechController.respond(item.title)
                 }
                 
@@ -117,6 +120,7 @@ class RSSViewModel: ObservableObject {
                 if let nextItem: RSSFeedItem = self.queuedItems.first {
 
                     self.queuedItems.remove(at: 0)
+                    self.currentItem = nextItem
                     self.speechController.respond(nextItem.title)
                 }
 

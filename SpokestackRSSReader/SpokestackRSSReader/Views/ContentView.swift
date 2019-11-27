@@ -36,7 +36,7 @@ struct ContentView: View {
             List (self.viewModel.feedItems, id: \.title){item in
                 
                 FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
-//                    self.viewModel.readArticleDescription(feedItem.description)
+                    self.viewModel.readArticleDescription(feedItem.description)
                 }, seeMoreCallback: {url in
                     self.feedItemURL = url
                 })
@@ -50,7 +50,9 @@ struct ContentView: View {
                 SafariView(url: feedItemURL)
             })
             .navigationBarTitle("TechCrunch", displayMode: .inline)
-        }
+        }.onReceive(self.viewModel.currentItem, perform: {newItem in
+            
+        })
     }
     
     // MARK: Initializers

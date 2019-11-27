@@ -43,7 +43,7 @@ final class SpeechController: NSObject {
     
     let textPublisher = PassthroughSubject<String, Never>()
     
-    let itemFinishedPublisher = PassthroughSubject<String, Never>()
+    let itemFinishedPublisher = PassthroughSubject<Void, Never>()
     
     // MARK: Private (properties)
     
@@ -163,7 +163,7 @@ final class SpeechController: NSObject {
                     /// Need to send something more relevant or just letting subscriber know it is finished
                     /// You can't just send the status or you'll only receive one value
 
-                    self.itemFinishedPublisher.send("finished")
+                    self.itemFinishedPublisher.send()
                 }
             )
             .store(in: &self.subscriptions)
