@@ -65,7 +65,7 @@ final class SpeechController: NSObject {
     }
     
     lazy private var pipeline: SpeechPipeline = {
-    
+
        let speechPipeline = SpeechPipeline(SpeechProcessors.tfLiteWakeword.processor,
         speechConfiguration: SpeechConfiguration(),
         speechDelegate: self,
@@ -104,6 +104,10 @@ final class SpeechController: NSObject {
         self.textPublisher.send(completion: .finished)
     }
     
+    func activatePipelineASR() -> Void {
+        self.pipeline.activate()
+    }
+    
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
@@ -114,32 +118,11 @@ final class SpeechController: NSObject {
     
     private func parse() -> Void {
 
-        let pattern = #"""
-        (read|what|mark \h as \h read).*(latest|oldest)\s(tech\s?crunch|cnn|seen \h the \h news)
-        """#
-
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return
-        }
+        if self.transcript.contains(App.actionPhrase.lowercased()) {
         
-        let nsrange: NSRange = NSRange(self.transcript.startIndex..<self.transcript.endIndex, in: self.transcript)
-        let nsText: NSString = self.transcript as NSString
-        var utterance: String = ""
-        regex.enumerateMatches(in: self.transcript, options: [], range: nsrange) { result, flags, stop in
-                            
-                            guard let result = result else {
-                                return
-                            }
-                            
-                            let range = result.range
-                            let foundText = nsText.substring(with: range)
-
-                            utterance = foundText
-                            stop.pointee = true
+            self.textPublisher.send(self.transcript)
+            self.textPublisher.send(completion: .finished)
         }
-        
-        self.textPublisher.send(utterance)
-        self.textPublisher.send(completion: .finished)
     }
     
     private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
