@@ -10,6 +10,8 @@ import Foundation
 import Combine
 import AVFoundation
 
+private let workItemQueue: DispatchQueue = DispatchQueue(label: "com.spokestack.workitem.queue")
+
 class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
@@ -28,6 +30,8 @@ class RSSViewModel: ObservableObject {
     private var speechController: SpeechController = SpeechController()
     
     private var subscriptions = Set<AnyCancellable>()
+    
+    private var item: DispatchWorkItem!
     
     private var shouldAnnounceWelcome: Bool = true {
         
@@ -57,25 +61,24 @@ class RSSViewModel: ObservableObject {
     func activatePipeline() -> Void {
         
         if self.shouldAnnounceWelcome {
-            
+
             self.speechController.respond(App.welcomeMessage)
             self.load()
-            
+
         } else {
-            
+
             self.load()
         }
 
-//        self.speechController.start()
-//        self.speechController.textPublisher.sink( receiveCompletion: { [unowned self] completion in
-//
-//            self.speechController.stop()
-//
-//        }, receiveValue: { [unowned self] value in
-//
-//            self.load()
-//        })
-//        .store(in: &self.subscriptions)
+        self.speechController.textPublisher.sink( receiveCompletion: { [unowned self] completion in
+
+            self.speechController.stop()
+
+        }, receiveValue: { [unowned self] value in
+            print("what is textPublisher value \(value)")
+            self.readArticleDescription(self.currentItem!.description)
+        })
+        .store(in: &self.subscriptions)
     }
     
     func deactivePipeline() -> Void {
@@ -90,21 +93,18 @@ class RSSViewModel: ObservableObject {
         let rssController: RSSController = RSSController(feedURL)
         
         rssController.parseFeed({feedItems in
+            
             self.feedItems = feedItems
             self.shouldAnnounceWelcome.toggle()
         })
     }
     
-    private func processSpeech() -> Void {
-
-        self.feedItems.forEach {
-            self.speechController.respond($0.title)
-        }
-    }
-    
     private func processHeadlines() -> Void {
-        
+
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
+
+            /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
+            /// and the queued items are the same
             
             if self.feedItems.count == self.queuedItems.count {
                 
@@ -116,17 +116,34 @@ class RSSViewModel: ObservableObject {
                 }
                 
             } else if !self.queuedItems.isEmpty {
-             
-                if let nextItem: RSSFeedItem = self.queuedItems.first {
+                
+                self.item = DispatchWorkItem { [weak self] in
+                    
+                    guard let strongSelf = self else {
+                        print("FAIL ON STRONG SELF")
+                        return
+                    }
+                    
+                    if !strongSelf.item.isCancelled {
+                        print("Not cancelled so start")
+                        strongSelf.speechController.activatePipelineASR()
+                    } else {
+                        strongSelf.speechController.stop()
+                    }
+                    
+                    self?.item = nil
+                }
 
-                    self.queuedItems.remove(at: 0)
-                    self.currentItem = nextItem
-                    self.speechController.respond(nextItem.title)
+                workItemQueue.async(execute: self.item)
+                workItemQueue.asyncAfter(deadline: .now() + 5.5) {[weak self] in
+                    print("I should be cancelling the speech controller")
+                    self?.item?.cancel()
+                    self?.processNextItem()
                 }
 
             } else {
 
-                /// All items have been read so shut everything down: TBD
+                self.speechController.respond(App.finishedMessage)
             }
             
         }).store(in: &self.subscriptions)
@@ -136,13 +153,32 @@ class RSSViewModel: ObservableObject {
         /// Should timer be instance var with no auto connect?
         /// That way after an item has finished, Start a new timer, active ASR, if found, then cancel timer, read description, shut down ASR  and then continue
         
-//        let cancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
+//        self.timerCancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
 //        .autoconnect()
 //        .sink { receivedTimeStamp in
 //            print("passed through: ", receivedTimeStamp)
 //        }
+        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 10.5) {
 //
-//        cancellable.store(in: &self.subscriptions)
+//            self.timerCancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
+//            .autoconnect()
+//            .sink { receivedTimeStamp in
+//                print("passed through 1111: ", receivedTimeStamp)
+//            }
+//        }
+    }
+    
+    private func processNextItem() -> Void {
+        
+        self.speechController.stop()
+
+        if let nextItem: RSSFeedItem = self.queuedItems.first {
+   
+             self.queuedItems.remove(at: 0)
+             self.currentItem = nextItem
+             self.speechController.respond(nextItem.title)
+         }
     }
 }
 
