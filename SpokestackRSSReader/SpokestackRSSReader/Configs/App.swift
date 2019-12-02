@@ -10,7 +10,7 @@ import Foundation
 
 struct App {
 
-    static let welcomeMessage: String = "Welcoem to the latest TechCrunch Headlines"
+    static let welcomeMessage: String = "Welcome to the latest TechCrunch Headlines"
     
     static let actionDelay: Float = 1.5
     
