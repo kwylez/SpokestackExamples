@@ -20,8 +20,9 @@ extension RSSFeed {
             let title: String = rssFeedItem.title ?? "Title N/A"
             let link: String = rssFeedItem.link ?? "Link N/A"
             let description: String = rssFeedItem.description ?? "Description N/A"
+            let publishedDate: Date = rssFeedItem.pubDate ?? Date()
             
-            let feedItem: RSSFeedItem = RSSFeedItem(title: title, link: link, description: description)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description)
             feedItems.append(feedItem)
         }
         
@@ -40,8 +41,9 @@ extension JSONFeed {
             let title: String = rssFeedItem.title ?? "Title N/A"
             let link: String = rssFeedItem.url ?? "Link N/A"
             let description: String = rssFeedItem.summary ?? "Description N/A"
+            let publishedDate: Date = rssFeedItem.datePublished ?? Date()
             
-            let feedItem: RSSFeedItem = RSSFeedItem(title: title, link: link, description: description)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description)
             feedItems.append(feedItem)
         }
         
@@ -60,8 +62,9 @@ extension AtomFeed {
             let title: String = rssFeedItem.title ?? "Title N/A"
             let link: String = rssFeedItem.links?.first?.attributes?.href ?? "Link N/A"
             let description: String = rssFeedItem.summary?.value ?? "Description N/A"
+            let publishedDate: Date = rssFeedItem.published ?? Date()
             
-            let feedItem: RSSFeedItem = RSSFeedItem(title: title, link: link, description: description)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description)
             feedItems.append(feedItem)
         }
         

@@ -35,7 +35,7 @@ struct ContentView: View {
     
         NavigationView {
             
-            List (self.viewModel.feedItems, id: \.title){item in
+            List (self.viewModel.feedItems, id: \.publishedDate){item in
                 
                 FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
                     self.viewModel.readArticleDescription(feedItem.description)

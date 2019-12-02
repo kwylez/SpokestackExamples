@@ -15,6 +15,8 @@ struct RSSFeedItem: Identifiable {
     
     let id: UUID = UUID()
     
+    let publishedDate: Date
+    
     let title: String
     
     let link: String
