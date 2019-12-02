@@ -29,6 +29,8 @@ struct ContentView: View {
     
     @State var feedItemURL: URL? = nil
     
+    @State var currentItem: RSSFeedItem? = nil
+    
     var body: some View {
     
         NavigationView {
@@ -39,8 +41,12 @@ struct ContentView: View {
                     self.viewModel.readArticleDescription(feedItem.description)
                 }, seeMoreCallback: {url in
                     self.feedItemURL = url
-                })
+                }, currentItem: self.$currentItem)
             }
+            .onReceive(self.viewModel.objectWillChange, perform: {newItem in
+                print("current item \(String(describing: self.viewModel.currentItem))")
+                self.currentItem = self.viewModel.currentItem
+            })
             .onAppear{
                 self.viewModel.activatePipeline()
             }.onDisappear() {
@@ -50,9 +56,7 @@ struct ContentView: View {
                 SafariView(url: feedItemURL)
             })
             .navigationBarTitle("TechCrunch", displayMode: .inline)
-        }.onReceive(self.viewModel.currentItem, perform: {newItem in
-            
-        })
+        }
     }
     
     // MARK: Initializers
