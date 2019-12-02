@@ -21,6 +21,8 @@ struct FeedCardView: View {
     
     var seeMoreCallback: FeedCardSeeMoreCallback?
     
+    @Binding var currentItem: RSSFeedItem?
+    
     var body: some View {
 
         VStack {
@@ -67,11 +69,24 @@ struct FeedCardView: View {
         .background(Color.white)
         .cornerRadius(10.0)
         .shadow(color: Color.gray.opacity(0.4), radius: 5.0)
+        .scaleEffect(isCurrent ? 1.05 : 1)
+        .animation(.easeInOut(duration: 0.3))
+    }
+    
+    // MARK: Private (properties)
+    
+    private var isCurrent: Bool {
+        
+        guard let current: RSSFeedItem = self.currentItem else {
+            return false
+        }
+        
+        return current.title == feedItem.title
     }
 }
 
-struct FeedCardView_Previews: PreviewProvider {
-    static var previews: some View {
-        FeedCardView(feedItem: RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "https://spokestack.io/", description: "This is my position"))
-    }
-}
+//struct FeedCardView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        FeedCardView(feedItem: RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "https://spokestack.io/", description: "This is my position"), currentItem: RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "https://spokestack.io/", description: "This is my position"))
+//    }
+//}
