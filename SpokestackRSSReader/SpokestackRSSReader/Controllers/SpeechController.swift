@@ -107,7 +107,6 @@ final class SpeechController: NSObject {
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
-        print("what is my latest input \(input.input)")
         self.tts?.synthesize(input)
     }
     
