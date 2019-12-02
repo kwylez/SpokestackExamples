@@ -32,6 +32,7 @@ struct FeedCardView: View {
                 Text("\(self.feedItem.title)")
                     .font(.headline)
                     .fontWeight(.bold)
+                    .foregroundColor(.black)
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                     .lineLimit(nil)
