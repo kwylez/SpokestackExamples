@@ -45,7 +45,9 @@ struct ContentView: View {
             }
             .onReceive(self.viewModel.objectWillChange, perform: {newItem in
                 print("current item \(String(describing: self.viewModel.currentItem))")
-                self.currentItem = self.viewModel.currentItem
+                DispatchQueue.main.async {
+                    self.currentItem = self.viewModel.currentItem
+                }
             })
             .onAppear{
                 self.viewModel.activatePipeline()
