@@ -112,6 +112,10 @@ final class SpeechController: NSObject {
         self.pipeline.activate()
     }
     
+    func deactivatePipelineASR() -> Void {
+        self.pipeline.deactivate()
+    }
+    
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
