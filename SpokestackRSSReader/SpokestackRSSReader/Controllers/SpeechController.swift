@@ -66,13 +66,22 @@ final class SpeechController: NSObject {
     
     lazy private var pipeline: SpeechPipeline = {
 
-       let speechPipeline = SpeechPipeline(SpeechProcessors.tfLiteWakeword.processor,
-        speechConfiguration: SpeechConfiguration(),
-        speechDelegate: self,
-        wakewordService: SpeechProcessors.appleSpeech.processor,
-        pipelineDelegate: self)
+        let c = SpeechConfiguration()
+        let filterPath = Bundle(for: type(of: self)).path(forResource: c.filterModelName, ofType: "lite")!
+        c.filterModelPath = filterPath
+       
+        let encodePath = Bundle(for: type(of: self)).path(forResource: c.encodeModelName, ofType: "lite")!
+        c.encodeModelPath = encodePath
         
-        return speechPipeline
+        let detectPath = Bundle(for: type(of: self)).path(forResource: c.detectModelName, ofType: "lite")!
+        c.detectModelPath = detectPath
+        c.tracing = Trace.Level.PERF
+       
+        return SpeechPipeline(SpeechProcessors.appleSpeech.processor,
+                             speechConfiguration: c,
+                             speechDelegate: self,
+                             wakewordService: SpeechProcessors.appleWakeword.processor,
+                             pipelineDelegate: self)
     }()
     
     // MARK: Initializers
@@ -86,10 +95,7 @@ final class SpeechController: NSObject {
         super.init()
         
         avSpeechSynthesizer.delegate = self
-        
-        let config: SpeechConfiguration = SpeechConfiguration()
-        config.tracing = .NONE
-        tts = TextToSpeech(self, configuration: config)
+        tts = TextToSpeech(self, configuration: SpeechConfiguration())
     }
     
     // MARK: Internal (methods)
@@ -99,9 +105,7 @@ final class SpeechController: NSObject {
     }
     
     func stop() -> Void {
-        
         self.pipeline.stop()
-        self.textPublisher.send(completion: .finished)
     }
     
     func activatePipelineASR() -> Void {
@@ -119,13 +123,18 @@ final class SpeechController: NSObject {
     private func parse() -> Void {
 
         if self.transcript.contains(App.actionPhrase.lowercased()) {
-        
+            print("should be parsing....")
             self.textPublisher.send(self.transcript)
-            self.textPublisher.send(completion: .finished)
+            self.stop()
         }
     }
     
     private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
+
+        /// Set the appropriate audio session
+        
+        try? AVAudioSession.sharedInstance().setCategory(.playAndRecord)
+        try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player = AVPlayer(playerItem: playerItem)
         self.player.play()
