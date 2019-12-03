@@ -44,7 +44,6 @@ struct ContentView: View {
                 }, currentItem: self.$currentItem)
             }
             .onReceive(self.viewModel.objectWillChange, perform: {newItem in
-                print("current item \(String(describing: self.viewModel.currentItem)) and new item \(newItem)")
                 DispatchQueue.main.async {
                     self.currentItem = self.viewModel.currentItem
                 }
