@@ -27,7 +27,7 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Private (properties)
     
-    private var currentItemDescription: String?
+    private var processingCurrentItemDescription: Bool = false
     
     private var speechController: SpeechController = SpeechController()
     
@@ -58,7 +58,7 @@ class RSSViewModel: ObservableObject {
     
     func readArticleDescription(_ description: String) -> Void {
         
-        self.currentItemDescription = description
+        self.processingCurrentItemDescription = true
         self.speechController.respond(description)
     }
     
@@ -74,7 +74,9 @@ class RSSViewModel: ObservableObject {
             self.load()
         }
 
-        self.speechController.textPublisher.sink( receiveCompletion: { _ in }, receiveValue: { [unowned self] value in
+        self.speechController.textPublisher.sink( receiveCompletion: { _ in
+            print("did i stop======")
+        }, receiveValue: { [unowned self] value in
             
             print("what is textPublisher value \(value)")
             self.readArticleDescription(self.currentItem!.description)
@@ -83,7 +85,7 @@ class RSSViewModel: ObservableObject {
     }
     
     func deactivePipeline() -> Void {
-        self.speechController.stop()
+        self.speechController.deactivatePipelineASR()
     }
     
     // MARK: Private (methods)
@@ -104,7 +106,7 @@ class RSSViewModel: ObservableObject {
 
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
             
-            self.currentItemDescription = nil
+            self.processingCurrentItemDescription = false
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
             /// and the queued items are the same
@@ -139,7 +141,7 @@ class RSSViewModel: ObservableObject {
 
                 workItemQueue.async(execute: self.item)
                 workItemQueue.asyncAfter(deadline: .now() + 5.5) {[weak self] in
-                    print("I should be cancelling the speech controller")
+                    
                     DispatchQueue.main.async {
                         self?.item?.cancel()
                         self?.processNextItem()
@@ -156,12 +158,12 @@ class RSSViewModel: ObservableObject {
     
     private func processNextItem() -> Void {
         
-        if self.currentItemDescription != nil {
+        if self.processingCurrentItemDescription {
             return
         }
         
-        self.speechController.stop()
-
+        self.deactivePipeline()
+        print("I should be cancelling the speech controller")
         if let nextItem: RSSFeedItem = self.queuedItems.first {
    
              self.queuedItems.remove(at: 0)
