@@ -27,6 +27,8 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Private (properties)
     
+    private var currentItemDescription: String?
+    
     private var speechController: SpeechController = SpeechController()
     
     private var subscriptions = Set<AnyCancellable>()
@@ -55,6 +57,8 @@ class RSSViewModel: ObservableObject {
     // MARK: Internal (methods)
     
     func readArticleDescription(_ description: String) -> Void {
+        
+        self.currentItemDescription = description
         self.speechController.respond(description)
     }
     
@@ -70,11 +74,8 @@ class RSSViewModel: ObservableObject {
             self.load()
         }
 
-        self.speechController.textPublisher.sink( receiveCompletion: { [unowned self] completion in
-
-            self.speechController.stop()
-
-        }, receiveValue: { [unowned self] value in
+        self.speechController.textPublisher.sink( receiveCompletion: { _ in }, receiveValue: { [unowned self] value in
+            
             print("what is textPublisher value \(value)")
             self.readArticleDescription(self.currentItem!.description)
         })
@@ -102,6 +103,8 @@ class RSSViewModel: ObservableObject {
     private func processHeadlines() -> Void {
 
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
+            
+            self.currentItemDescription = nil
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
             /// and the queued items are the same
@@ -120,7 +123,6 @@ class RSSViewModel: ObservableObject {
                 self.item = DispatchWorkItem { [weak self] in
                     
                     guard let strongSelf = self else {
-                        print("FAIL ON STRONG SELF")
                         return
                     }
                     
@@ -128,6 +130,7 @@ class RSSViewModel: ObservableObject {
                         print("Not cancelled so start")
                         strongSelf.speechController.activatePipelineASR()
                     } else {
+                        print("The work item is cancelled")
                         strongSelf.speechController.stop()
                     }
                     
@@ -137,8 +140,10 @@ class RSSViewModel: ObservableObject {
                 workItemQueue.async(execute: self.item)
                 workItemQueue.asyncAfter(deadline: .now() + 5.5) {[weak self] in
                     print("I should be cancelling the speech controller")
-                    self?.item?.cancel()
-                    self?.processNextItem()
+                    DispatchQueue.main.async {
+                        self?.item?.cancel()
+                        self?.processNextItem()
+                    }
                 }
 
             } else {
@@ -147,29 +152,13 @@ class RSSViewModel: ObservableObject {
             }
             
         }).store(in: &self.subscriptions)
-        
-        /// Read article after 1.5 seconds
-        ///
-        /// Should timer be instance var with no auto connect?
-        /// That way after an item has finished, Start a new timer, active ASR, if found, then cancel timer, read description, shut down ASR  and then continue
-        
-//        self.timerCancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
-//        .autoconnect()
-//        .sink { receivedTimeStamp in
-//            print("passed through: ", receivedTimeStamp)
-//        }
-        
-//        DispatchQueue.main.asyncAfter(deadline: .now() + 10.5) {
-//
-//            self.timerCancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
-//            .autoconnect()
-//            .sink { receivedTimeStamp in
-//                print("passed through 1111: ", receivedTimeStamp)
-//            }
-//        }
     }
     
     private func processNextItem() -> Void {
+        
+        if self.currentItemDescription != nil {
+            return
+        }
         
         self.speechController.stop()
 
