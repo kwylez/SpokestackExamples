@@ -141,11 +141,7 @@
 		011D48DE237DB6E200EA951E /* SpokestackRSSReader */ = {
 			isa = PBXGroup;
 			children = (
-				016B539A2395B33400EE94EA /* Detect.mlmodel */,
-				016B539C2395B33400EE94EA /* Encode.lite */,
-				016B539D2395B33400EE94EA /* Filter.lite */,
-				016B539B2395B33400EE94EA /* Filter.mlmodel */,
-				016B53982395B20700EE94EA /* Detect.lite */,
+				0197F2332398263A002A1C6F /* Machine Learning */,
 				011D48DF237DB6E200EA951E /* AppDelegate.swift */,
 				01A838C323862D4400989C87 /* Configs */,
 				01025B282380732D00809F88 /* Controllers */,
@@ -167,6 +163,18 @@
 				011D48E8237DB6E400EA951E /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		0197F2332398263A002A1C6F /* Machine Learning */ = {
+			isa = PBXGroup;
+			children = (
+				016B539A2395B33400EE94EA /* Detect.mlmodel */,
+				016B539C2395B33400EE94EA /* Encode.lite */,
+				016B539D2395B33400EE94EA /* Filter.lite */,
+				016B539B2395B33400EE94EA /* Filter.mlmodel */,
+				016B53982395B20700EE94EA /* Detect.lite */,
+			);
+			path = "Machine Learning";
 			sourceTree = "<group>";
 		};
 		01A838C323862D4400989C87 /* Configs */ = {
