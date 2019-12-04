@@ -103,9 +103,7 @@ class RSSViewModel: ObservableObject {
     private func processHeadlines() -> Void {
 
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
-            
-            print("viewModel value \(value)")
-            
+
             self.processingCurrentItemDescription = false
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
@@ -118,17 +116,11 @@ class RSSViewModel: ObservableObject {
                     self.queuedItems.remove(at: 0)
                     self.currentItem = item
                     self.speechController.respond(item.title)
-                    
-                    /// Post to value (AVPlayerItem and current item)
                 }
                 
             } else if !self.queuedItems.isEmpty {
                 
                 self.processNextItem()
-
-            } else {
-
-                self.speechController.respond(App.finishedMessage)
             }
             
         }).store(in: &self.subscriptions)
@@ -139,15 +131,17 @@ class RSSViewModel: ObservableObject {
         if self.processingCurrentItemDescription {
             return
         }
-        
-        self.deactivePipeline()
 
         if let nextItem: RSSFeedItem = self.queuedItems.first {
    
              self.queuedItems.remove(at: 0)
              self.currentItem = nextItem
              self.speechController.respond(nextItem.title)
-         }
+            
+        } else if self.queuedItems.isEmpty {
+            
+            self.speechController.respond(App.finishedMessage)
+        }
     }
 }
 
