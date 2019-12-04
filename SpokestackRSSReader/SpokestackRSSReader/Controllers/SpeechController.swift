@@ -149,7 +149,7 @@ final class SpeechController: NSObject {
         
         let _ = NotificationCenter.default
             .publisher(for: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
-            .map({ $0.object })
+            .map({ $0.object as! AVPlayerItem })
             .sink(
                 receiveCompletion: {_ in },
                 receiveValue: { value in
@@ -159,7 +159,7 @@ final class SpeechController: NSObject {
                     /// Need to send something more relevant or just letting subscriber know it is finished
                     /// You can't just send the status or you'll only receive one value
 
-                    self.itemFinishedPublisher.send(value as! AVPlayerItem)
+                    self.itemFinishedPublisher.send(value)
                 }
             )
             .store(in: &self.subscriptions)
