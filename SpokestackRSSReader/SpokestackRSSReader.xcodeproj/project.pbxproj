@@ -25,6 +25,7 @@
 		0174EBE12389AF3900A7EAA7 /* FeedCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */; };
 		0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */; };
 		017B2A602382E84B004FA244 /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 017B2A5F2382E84B004FA244 /* SpeechController.swift */; };
+		0197F23523982A2A002A1C6F /* RemoteImageController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0197F23423982A2A002A1C6F /* RemoteImageController.swift */; };
 		01A838C523862D5200989C87 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A838C423862D5200989C87 /* App.swift */; };
 		01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */; };
 		01DF9698238C751400DC3A83 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DF9697238C751400DC3A83 /* SafariView.swift */; };
@@ -52,6 +53,7 @@
 		0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCardView.swift; sourceTree = "<group>"; };
 		0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedCardViewDivider.swift; sourceTree = "<group>"; };
 		017B2A5F2382E84B004FA244 /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
+		0197F23423982A2A002A1C6F /* RemoteImageController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageController.swift; sourceTree = "<group>"; };
 		01A838C423862D5200989C87 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
 		01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSafariViewController.swift; sourceTree = "<group>"; };
 		01DF9697238C751400DC3A83 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 			children = (
 				01347007237F5E2E00AD3588 /* RSSController.swift */,
 				017B2A5F2382E84B004FA244 /* SpeechController.swift */,
+				0197F23423982A2A002A1C6F /* RemoteImageController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -333,6 +336,7 @@
 				0174EBE12389AF3900A7EAA7 /* FeedCardView.swift in Sources */,
 				01DF9698238C751400DC3A83 /* SafariView.swift in Sources */,
 				011D48E2237DB6E200EA951E /* SceneDelegate.swift in Sources */,
+				0197F23523982A2A002A1C6F /* RemoteImageController.swift in Sources */,
 				01347008237F5E2E00AD3588 /* RSSController.swift in Sources */,
 				016B539F2395B33400EE94EA /* Filter.mlmodel in Sources */,
 				01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */,
