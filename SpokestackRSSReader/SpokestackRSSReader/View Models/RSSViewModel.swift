@@ -10,8 +10,6 @@ import Foundation
 import Combine
 import AVFoundation
 
-private let workItemQueue: DispatchQueue = DispatchQueue(label: "com.spokestack.workitem.queue")
-
 class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
@@ -106,6 +104,8 @@ class RSSViewModel: ObservableObject {
 
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
             
+            print("viewModel value \(value)")
+            
             self.processingCurrentItemDescription = false
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
@@ -118,35 +118,13 @@ class RSSViewModel: ObservableObject {
                     self.queuedItems.remove(at: 0)
                     self.currentItem = item
                     self.speechController.respond(item.title)
+                    
+                    /// Post to value (AVPlayerItem and current item)
                 }
                 
             } else if !self.queuedItems.isEmpty {
                 
-                self.item = DispatchWorkItem { [weak self] in
-                    
-                    guard let strongSelf = self else {
-                        return
-                    }
-                    
-                    if !strongSelf.item.isCancelled {
-                        print("Not cancelled so start")
-                        strongSelf.speechController.activatePipelineASR()
-                    } else {
-                        print("The work item is cancelled")
-                        strongSelf.speechController.stop()
-                    }
-                    
-                    self?.item = nil
-                }
-
-                workItemQueue.async(execute: self.item)
-                workItemQueue.asyncAfter(deadline: .now() + 5.5) {[weak self] in
-                    
-                    DispatchQueue.main.async {
-                        self?.item?.cancel()
-                        self?.processNextItem()
-                    }
-                }
+                self.processNextItem()
 
             } else {
 
@@ -163,7 +141,7 @@ class RSSViewModel: ObservableObject {
         }
         
         self.deactivePipeline()
-        print("I should be cancelling the speech controller")
+
         if let nextItem: RSSFeedItem = self.queuedItems.first {
    
              self.queuedItems.remove(at: 0)
