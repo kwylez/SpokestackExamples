@@ -21,8 +21,9 @@ extension RSSFeed {
             let link: String = rssFeedItem.link ?? "Link N/A"
             let description: String = rssFeedItem.description ?? "Description N/A"
             let publishedDate: Date = rssFeedItem.pubDate ?? Date()
+            let imageLink: String = rssFeedItem.media?.mediaThumbnails?.first?.attributes?.url ?? ""
             
-            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description, imageLink: imageLink)
             feedItems.append(feedItem)
         }
         
@@ -42,8 +43,9 @@ extension JSONFeed {
             let link: String = rssFeedItem.url ?? "Link N/A"
             let description: String = rssFeedItem.summary ?? "Description N/A"
             let publishedDate: Date = rssFeedItem.datePublished ?? Date()
+            let imageLink: String = rssFeedItem.image ?? ""
             
-            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description, imageLink: imageLink)
             feedItems.append(feedItem)
         }
         
@@ -63,8 +65,9 @@ extension AtomFeed {
             let link: String = rssFeedItem.links?.first?.attributes?.href ?? "Link N/A"
             let description: String = rssFeedItem.summary?.value ?? "Description N/A"
             let publishedDate: Date = rssFeedItem.published ?? Date()
+            let imageLink: String = rssFeedItem.media?.mediaThumbnails?.first?.attributes?.url ?? ""
             
-            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description, imageLink: imageLink)
             feedItems.append(feedItem)
         }
         
