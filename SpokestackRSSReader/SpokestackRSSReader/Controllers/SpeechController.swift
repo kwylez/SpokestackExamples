@@ -43,7 +43,7 @@ final class SpeechController: NSObject {
     
     let textPublisher = PassthroughSubject<String, Never>()
     
-    let itemFinishedPublisher = PassthroughSubject<Void, Never>()
+    let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
     // MARK: Private (properties)
     
@@ -149,16 +149,17 @@ final class SpeechController: NSObject {
         
         let _ = NotificationCenter.default
             .publisher(for: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
+            .map({ $0.object })
             .sink(
                 receiveCompletion: {_ in },
                 receiveValue: { value in
                     
-                    print("what is my value \(value)")
+                    print("what is my value \(String(describing: value))")
                     
                     /// Need to send something more relevant or just letting subscriber know it is finished
                     /// You can't just send the status or you'll only receive one value
 
-                    self.itemFinishedPublisher.send()
+                    self.itemFinishedPublisher.send(value as! AVPlayerItem)
                 }
             )
             .store(in: &self.subscriptions)
