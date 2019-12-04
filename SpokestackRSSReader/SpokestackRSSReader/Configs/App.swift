@@ -14,6 +14,10 @@ struct App {
     
     static let actionDelay: Float = 1.5
     
+    static let actionPhrase: String = "Tell me more"
+    
+    static let finishedMessage: String = "You're all caught up"
+    
     struct Feed {
         
         static let heading: String = "TechCrunch"

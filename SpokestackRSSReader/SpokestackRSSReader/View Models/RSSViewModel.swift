@@ -25,9 +25,13 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Private (properties)
     
+    private var processingCurrentItemDescription: Bool = false
+    
     private var speechController: SpeechController = SpeechController()
     
     private var subscriptions = Set<AnyCancellable>()
+    
+    private var item: DispatchWorkItem!
     
     private var shouldAnnounceWelcome: Bool = true {
         
@@ -51,35 +55,35 @@ class RSSViewModel: ObservableObject {
     // MARK: Internal (methods)
     
     func readArticleDescription(_ description: String) -> Void {
+        
+        self.processingCurrentItemDescription = true
         self.speechController.respond(description)
     }
     
     func activatePipeline() -> Void {
         
         if self.shouldAnnounceWelcome {
-            
+
             self.speechController.respond(App.welcomeMessage)
             self.load()
-            
+
         } else {
-            
+
             self.load()
         }
 
-//        self.speechController.start()
-//        self.speechController.textPublisher.sink( receiveCompletion: { [unowned self] completion in
-//
-//            self.speechController.stop()
-//
-//        }, receiveValue: { [unowned self] value in
-//
-//            self.load()
-//        })
-//        .store(in: &self.subscriptions)
+        self.speechController.textPublisher.sink( receiveCompletion: { _ in
+            print("did i stop======")
+        }, receiveValue: { [unowned self] value in
+            
+            print("what is textPublisher value \(value)")
+            self.readArticleDescription(self.currentItem!.description)
+        })
+        .store(in: &self.subscriptions)
     }
     
     func deactivePipeline() -> Void {
-        self.speechController.stop()
+        self.speechController.deactivatePipelineASR()
     }
     
     // MARK: Private (methods)
@@ -90,21 +94,22 @@ class RSSViewModel: ObservableObject {
         let rssController: RSSController = RSSController(feedURL)
         
         rssController.parseFeed({feedItems in
+            
             self.feedItems = feedItems
             self.shouldAnnounceWelcome.toggle()
         })
     }
     
-    private func processSpeech() -> Void {
-
-        self.feedItems.forEach {
-            self.speechController.respond($0.title)
-        }
-    }
-    
     private func processHeadlines() -> Void {
-        
+
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
+            
+            print("viewModel value \(value)")
+            
+            self.processingCurrentItemDescription = false
+
+            /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
+            /// and the queued items are the same
             
             if self.feedItems.count == self.queuedItems.count {
                 
@@ -113,36 +118,36 @@ class RSSViewModel: ObservableObject {
                     self.queuedItems.remove(at: 0)
                     self.currentItem = item
                     self.speechController.respond(item.title)
+                    
+                    /// Post to value (AVPlayerItem and current item)
                 }
                 
             } else if !self.queuedItems.isEmpty {
-             
-                if let nextItem: RSSFeedItem = self.queuedItems.first {
-
-                    self.queuedItems.remove(at: 0)
-                    self.currentItem = nextItem
-                    self.speechController.respond(nextItem.title)
-                }
+                
+                self.processNextItem()
 
             } else {
 
-                /// All items have been read so shut everything down: TBD
+                self.speechController.respond(App.finishedMessage)
             }
             
         }).store(in: &self.subscriptions)
+    }
+    
+    private func processNextItem() -> Void {
         
-        /// Read article after 1.5 seconds
-        ///
-        /// Should timer be instance var with no auto connect?
-        /// That way after an item has finished, Start a new timer, active ASR, if found, then cancel timer, read description, shut down ASR  and then continue
+        if self.processingCurrentItemDescription {
+            return
+        }
         
-//        let cancellable = Timer.publish(every: 1.5, on: RunLoop.main, in: .common)
-//        .autoconnect()
-//        .sink { receivedTimeStamp in
-//            print("passed through: ", receivedTimeStamp)
-//        }
-//
-//        cancellable.store(in: &self.subscriptions)
+        self.deactivePipeline()
+
+        if let nextItem: RSSFeedItem = self.queuedItems.first {
+   
+             self.queuedItems.remove(at: 0)
+             self.currentItem = nextItem
+             self.speechController.respond(nextItem.title)
+         }
     }
 }
 

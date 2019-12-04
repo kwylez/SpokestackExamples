@@ -43,7 +43,7 @@ final class SpeechController: NSObject {
     
     let textPublisher = PassthroughSubject<String, Never>()
     
-    let itemFinishedPublisher = PassthroughSubject<Void, Never>()
+    let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
     // MARK: Private (properties)
     
@@ -65,14 +65,23 @@ final class SpeechController: NSObject {
     }
     
     lazy private var pipeline: SpeechPipeline = {
-    
-       let speechPipeline = SpeechPipeline(SpeechProcessors.tfLiteWakeword.processor,
-        speechConfiguration: SpeechConfiguration(),
-        speechDelegate: self,
-        wakewordService: SpeechProcessors.appleSpeech.processor,
-        pipelineDelegate: self)
+
+        let c = SpeechConfiguration()
+        let filterPath = Bundle(for: type(of: self)).path(forResource: c.filterModelName, ofType: "lite")!
+        c.filterModelPath = filterPath
+       
+        let encodePath = Bundle(for: type(of: self)).path(forResource: c.encodeModelName, ofType: "lite")!
+        c.encodeModelPath = encodePath
         
-        return speechPipeline
+        let detectPath = Bundle(for: type(of: self)).path(forResource: c.detectModelName, ofType: "lite")!
+        c.detectModelPath = detectPath
+        c.tracing = Trace.Level.PERF
+       
+        return SpeechPipeline(SpeechProcessors.appleSpeech.processor,
+                             speechConfiguration: c,
+                             speechDelegate: self,
+                             wakewordService: SpeechProcessors.appleWakeword.processor,
+                             pipelineDelegate: self)
     }()
     
     // MARK: Initializers
@@ -86,10 +95,7 @@ final class SpeechController: NSObject {
         super.init()
         
         avSpeechSynthesizer.delegate = self
-        
-        let config: SpeechConfiguration = SpeechConfiguration()
-        config.tracing = .NONE
-        tts = TextToSpeech(self, configuration: config)
+        tts = TextToSpeech(self, configuration: SpeechConfiguration())
     }
     
     // MARK: Internal (methods)
@@ -99,9 +105,15 @@ final class SpeechController: NSObject {
     }
     
     func stop() -> Void {
-        
         self.pipeline.stop()
-        self.textPublisher.send(completion: .finished)
+    }
+    
+    func activatePipelineASR() -> Void {
+        self.pipeline.activate()
+    }
+    
+    func deactivatePipelineASR() -> Void {
+        self.pipeline.deactivate()
     }
     
     func respond(_ text: String) -> Void {
@@ -114,35 +126,19 @@ final class SpeechController: NSObject {
     
     private func parse() -> Void {
 
-        let pattern = #"""
-        (read|what|mark \h as \h read).*(latest|oldest)\s(tech\s?crunch|cnn|seen \h the \h news)
-        """#
-
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return
+        if self.transcript.contains(App.actionPhrase.lowercased()) {
+            print("should be parsing....")
+            self.textPublisher.send(self.transcript)
+            self.stop()
         }
-        
-        let nsrange: NSRange = NSRange(self.transcript.startIndex..<self.transcript.endIndex, in: self.transcript)
-        let nsText: NSString = self.transcript as NSString
-        var utterance: String = ""
-        regex.enumerateMatches(in: self.transcript, options: [], range: nsrange) { result, flags, stop in
-                            
-                            guard let result = result else {
-                                return
-                            }
-                            
-                            let range = result.range
-                            let foundText = nsText.substring(with: range)
-
-                            utterance = foundText
-                            stop.pointee = true
-        }
-        
-        self.textPublisher.send(utterance)
-        self.textPublisher.send(completion: .finished)
     }
     
     private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
+
+        /// Set the appropriate audio session
+        
+        try? AVAudioSession.sharedInstance().setCategory(.playAndRecord)
+        try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player = AVPlayer(playerItem: playerItem)
         self.player.play()
@@ -153,16 +149,17 @@ final class SpeechController: NSObject {
         
         let _ = NotificationCenter.default
             .publisher(for: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
+            .map({ $0.object as! AVPlayerItem })
             .sink(
                 receiveCompletion: {_ in },
                 receiveValue: { value in
                     
-                    print("what is my value \(value)")
+                    print("what is my value \(String(describing: value))")
                     
                     /// Need to send something more relevant or just letting subscriber know it is finished
                     /// You can't just send the status or you'll only receive one value
 
-                    self.itemFinishedPublisher.send()
+                    self.itemFinishedPublisher.send(value)
                 }
             )
             .store(in: &self.subscriptions)
