@@ -11,20 +11,22 @@ import Combine
 import UIKit
 
 final class RemoteImageController: ObservableObject {
- 
+    
+    let id: String = UUID().uuidString
+
+    @Published private (set) var image: UIImage = RemoteImageController.defaultImage
+    
     @Published private (set) var isValidImage: Bool = false
     
-    private (set) var image: UIImage = UIImage()
-    
     // MARK: Private (properties)
+    
+    private static let defaultImage: UIImage = UIImage(named: "default-headline-image")!
     
     private var cancellable: AnyCancellable?
     
     deinit {
         cancellable?.cancel()
     }
-    
-    init(){}
     
     // MARK: Internal (methods)
     
@@ -42,17 +44,7 @@ final class RemoteImageController: ObservableObject {
         cancellable = urlSession.dataTaskPublisher(for: urlRequest)
         .map { UIImage(data: $0.data) }
         .receive(on: RunLoop.main)
-        .sink( receiveCompletion: { completion in
-            
-            switch completion {
-            case .failure(_):
-                self.isValidImage = false
-                break
-            default:
-                break
-            }
-            
-        }, receiveValue: { [unowned self] image in
+        .sink(receiveCompletion: {_ in }, receiveValue: { image in
 
             if let image = image {
                 
