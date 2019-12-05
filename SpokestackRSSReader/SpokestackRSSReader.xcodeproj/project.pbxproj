@@ -144,12 +144,12 @@
 		011D48DE237DB6E200EA951E /* SpokestackRSSReader */ = {
 			isa = PBXGroup;
 			children = (
-				0197F2332398263A002A1C6F /* Machine Learning */,
+				011D48ED237DB6E400EA951E /* Info.plist */,
 				011D48DF237DB6E200EA951E /* AppDelegate.swift */,
 				01A838C323862D4400989C87 /* Configs */,
 				01025B282380732D00809F88 /* Controllers */,
 				01F538D72380780800367C91 /* Extensions */,
-				011D48ED237DB6E400EA951E /* Info.plist */,
+				0197F2332398263A002A1C6F /* Machine Learning */,
 				01025B262380731300809F88 /* Models */,
 				011D48E7237DB6E400EA951E /* Preview Content */,
 				01025B23238072A300809F88 /* UI */,
