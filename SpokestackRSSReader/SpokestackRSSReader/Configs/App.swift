@@ -12,7 +12,7 @@ struct App {
 
     static let welcomeMessage: String = "Welcome to the latest TechCrunch Headlines"
     
-    static let actionDelay: Float = 1.5
+    static let actionDelay: TimeInterval = 1.5
     
     static let actionPhrase: String = "Tell me more"
     
