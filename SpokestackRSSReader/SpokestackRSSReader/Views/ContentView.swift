@@ -31,30 +31,40 @@ struct ContentView: View {
     
     @State var currentItem: RSSFeedItem? = nil
     
+    @State private var showModal: Bool = false
+    
     var body: some View {
     
         NavigationView {
-            
-            List (self.viewModel.feedItems, id: \.publishedDate){item in
+
+            List (self.viewModel.feedItems, id: \.publishedDate){ item in
                 
                 FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
+                    
                     self.viewModel.readArticleDescription(feedItem.description)
+
                 }, seeMoreCallback: {url in
+
                     self.feedItemURL = url
+                    self.showModal = true
+
                 }, currentItem: self.$currentItem)
             }
-            .onReceive(self.viewModel.objectWillChange, perform: {newItem in
+            .onReceive(self.viewModel.$currentItem, perform: {newItem in
                 DispatchQueue.main.async {
-                    self.currentItem = self.viewModel.currentItem
+                    
+                    if self.viewModel.currentItem != nil {
+                        self.currentItem = newItem
+                    }
                 }
             })
             .onAppear{
-                self.viewModel.activatePipeline()
+                self.viewModel.activateSpeech()
             }.onDisappear() {
-                self.viewModel.deactivePipeline()
+                self.viewModel.deactiveSpeech()
             }
-            .sheet(item: $feedItemURL, content: { feedItemURL in
-                SafariView(url: feedItemURL)
+            .sheet(isPresented: $showModal, content: {
+                SafariView(url: self.feedItemURL)
             })
             .navigationBarTitle("TechCrunch", displayMode: .inline)
         }

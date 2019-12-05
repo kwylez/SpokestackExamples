@@ -9,7 +9,11 @@
 import SwiftUI
 
 struct FeedCardViewDivider: View {
+    
+    // MARK: Internal (properties)
+    
     var body: some View {
+    
         Rectangle()
         .fill(Color("Gray"))
         .frame(height: 1)

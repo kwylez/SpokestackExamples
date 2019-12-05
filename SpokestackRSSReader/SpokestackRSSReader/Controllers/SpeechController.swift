@@ -12,28 +12,9 @@ import Combine
 import AVFoundation
 
 extension AVPlayer {
-    var isPlaying: Bool {
+    
+    var spk_isPlaying: Bool {
         return rate != 0 && error == nil
-    }
-}
-
-final class SpeechControllerTranscriptSubscriber: Subscriber {
-    
-    typealias Input = String
-    typealias Failure = Never
-    
-    func receive(subscription: Subscription) {
-        subscription.request(.max(1))
-    }
-    
-    func receive(_ input: String) -> Subscribers.Demand {
-        
-        print("received on custom subscriber \(input)")
-        return .unlimited
-    }
-    
-    func receive(completion: Subscribers.Completion<Never>) {
-        print("completion in the subscriber")
     }
 }
 
@@ -48,8 +29,6 @@ final class SpeechController: NSObject {
     // MARK: Private (properties)
     
     private var subscriptions = Set<AnyCancellable>()
-    
-    private let avSpeechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
     
     private var player: AVPlayer = AVPlayer()
     
@@ -93,8 +72,6 @@ final class SpeechController: NSObject {
     override init() {
         
         super.init()
-        
-        avSpeechSynthesizer.delegate = self
         tts = TextToSpeech(self, configuration: SpeechConfiguration())
     }
     
@@ -155,41 +132,11 @@ final class SpeechController: NSObject {
                 receiveValue: { value in
                     
                     print("what is my value \(String(describing: value))")
-                    
-                    /// Need to send something more relevant or just letting subscriber know it is finished
-                    /// You can't just send the status or you'll only receive one value
 
                     self.itemFinishedPublisher.send(value)
                 }
             )
             .store(in: &self.subscriptions)
-    }
-}
-
-extension SpeechController: AVSpeechSynthesizerDelegate {
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        print("sp did start \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        print("sp did finish \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-        print("sp did pause \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-        print("sp did continue \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        print("sp did cancel \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        print("sp willSpeakRangeOfSpeechString \(utterance)")
     }
 }
 

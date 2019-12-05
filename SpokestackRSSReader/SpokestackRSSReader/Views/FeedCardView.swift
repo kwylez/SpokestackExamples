@@ -11,6 +11,44 @@ import SwiftUI
 typealias FeedCardTellMoreCallback = (_ feedItem: RSSFeedItem) -> Void
 typealias FeedCardSeeMoreCallback = (_ url: URL) -> Void
 
+struct ImageView: View {
+    
+    // MARK: Internal (properties)
+    
+    @ObservedObject var imageLoader: RemoteImageController = RemoteImageController()
+    
+    @State var image: Image = Image("default-headline-image")
+    
+    var imageURL: String
+    
+    var body: some View {
+    
+        VStack {
+        
+            self.image
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 72, height: 73)
+
+        }.onReceive(self.imageLoader.$isValidImage, perform: {newValue in
+
+            print("image loader is valid \(self.imageLoader.isValidImage) newValue \(newValue)")
+            
+            if self.imageLoader.isValidImage {
+                self.image = Image(uiImage: self.imageLoader.image)
+            }
+        }).onAppear(perform: {
+            self.imageLoader.fetch(self.imageURL)
+        })
+    }
+    
+    // MARK: Initializers
+    
+    init(_ url: String) {
+        self.imageURL = url
+    }
+}
+
 struct FeedCardView: View {
     
     // MARK: Internal (properties)
@@ -27,7 +65,7 @@ struct FeedCardView: View {
 
         VStack {
             HStack(alignment: .top) {
-                Image("default-headline-image")
+                ImageView(self.feedItem.imageLink)
                     .padding([.leading, .trailing], 10.0)
                 Text("\(self.feedItem.title)")
                     .font(.headline)
@@ -68,6 +106,10 @@ struct FeedCardView: View {
             .padding()
         }
         .background(Color.white)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+            .stroke(Color("AquaMarine"), lineWidth: isCurrent ? 4 : 0)
+        )
         .cornerRadius(10.0)
         .shadow(color: Color.gray.opacity(0.4), radius: 5.0)
         .scaleEffect(isCurrent ? 1.05 : 1)

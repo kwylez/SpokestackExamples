@@ -22,5 +22,7 @@ struct RSSFeedItem: Identifiable {
     let link: String
     
     let description: String
+    
+    let imageLink: String
 }
 
