@@ -31,7 +31,7 @@ class RSSViewModel: ObservableObject {
     
     private var subscriptions = Set<AnyCancellable>()
     
-    private var item: DispatchWorkItem!
+    private var isFinished: Bool = false
     
     private var shouldAnnounceWelcome: Bool = true {
         
@@ -60,7 +60,7 @@ class RSSViewModel: ObservableObject {
         self.speechController.respond(description)
     }
     
-    func activatePipeline() -> Void {
+    func activateSpeech() -> Void {
         
         if self.shouldAnnounceWelcome {
 
@@ -72,17 +72,15 @@ class RSSViewModel: ObservableObject {
             self.load()
         }
 
-        self.speechController.textPublisher.sink( receiveCompletion: { _ in
-            print("did i stop======")
-        }, receiveValue: { [unowned self] value in
+        self.speechController.textPublisher.sink( receiveCompletion: { _ in },
+                                                  receiveValue: { [unowned self] value in
             
-            print("what is textPublisher value \(value)")
-            self.readArticleDescription(self.currentItem!.description)
+                                                    self.readArticleDescription(self.currentItem!.description)
         })
         .store(in: &self.subscriptions)
     }
     
-    func deactivePipeline() -> Void {
+    func deactiveSpeech() -> Void {
         self.speechController.deactivatePipelineASR()
     }
     
@@ -120,7 +118,17 @@ class RSSViewModel: ObservableObject {
                 
             } else if !self.queuedItems.isEmpty {
                 
-                self.processNextItem()
+                DispatchQueue.main.asyncAfter(deadline: .now() + App.actionDelay, execute: {[unowned self] in
+                  self.processNextItem()
+                })
+                
+            } else {
+
+                if !self.isFinished {
+                
+                    self.speechController.respond(App.finishedMessage)
+                    self.isFinished.toggle()
+                }
             }
             
         }).store(in: &self.subscriptions)
@@ -137,10 +145,6 @@ class RSSViewModel: ObservableObject {
              self.queuedItems.remove(at: 0)
              self.currentItem = nextItem
              self.speechController.respond(nextItem.title)
-            
-        } else if self.queuedItems.isEmpty {
-            
-            self.speechController.respond(App.finishedMessage)
         }
     }
 }
