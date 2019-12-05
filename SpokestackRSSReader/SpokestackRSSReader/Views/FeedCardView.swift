@@ -13,6 +13,8 @@ typealias FeedCardSeeMoreCallback = (_ url: URL) -> Void
 
 struct ImageView: View {
     
+    // MARK: Internal (properties)
+    
     @ObservedObject var imageLoader: RemoteImageController = RemoteImageController()
     
     @State var image: Image = Image("default-headline-image")
@@ -27,7 +29,10 @@ struct ImageView: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(width: 72, height: 73)
-        }.onReceive(imageLoader.objectWillChange, perform: {isValid in
+
+        }.onReceive(self.imageLoader.$isValidImage, perform: {newValue in
+
+            print("image loader is valid \(self.imageLoader.isValidImage) newValue \(newValue)")
             
             if self.imageLoader.isValidImage {
                 self.image = Image(uiImage: self.imageLoader.image)
@@ -37,10 +42,11 @@ struct ImageView: View {
         })
     }
     
+    // MARK: Initializers
+    
     init(_ url: String) {
         self.imageURL = url
     }
-
 }
 
 struct FeedCardView: View {
