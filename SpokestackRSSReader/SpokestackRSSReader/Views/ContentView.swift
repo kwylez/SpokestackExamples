@@ -36,20 +36,25 @@ struct ContentView: View {
     var body: some View {
     
         NavigationView {
+            
+            List {
+                Section(footer: FeedFooterView()) {
+                    ForEach(self.viewModel.feedItems, id: \.publishedDate) { item in
+                        
+                        FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
+                            
+                            self.viewModel.readArticleDescription(feedItem.description)
 
-            List (self.viewModel.feedItems, id: \.publishedDate){ item in
-                
-                FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
-                    
-                    self.viewModel.readArticleDescription(feedItem.description)
+                        }, seeMoreCallback: {url in
 
-                }, seeMoreCallback: {url in
+                            self.feedItemURL = url
+                            self.showModal = true
 
-                    self.feedItemURL = url
-                    self.showModal = true
-
-                }, currentItem: self.$currentItem)
+                        }, currentItem: self.$currentItem)
+                    }
+                }
             }
+            .listStyle(GroupedListStyle())
             .onReceive(self.viewModel.$currentItem, perform: {newItem in
                 DispatchQueue.main.async {
                     
