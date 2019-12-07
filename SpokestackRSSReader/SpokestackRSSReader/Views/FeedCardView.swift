@@ -32,11 +32,10 @@ struct ImageView: View {
 
         }.onReceive(self.imageLoader.$isValidImage, perform: {newValue in
 
-            print("image loader is valid \(self.imageLoader.isValidImage) newValue \(newValue)")
-            
-            if self.imageLoader.isValidImage {
+            if newValue {
                 self.image = Image(uiImage: self.imageLoader.image)
             }
+
         }).onAppear(perform: {
             self.imageLoader.fetch(self.imageURL)
         })
