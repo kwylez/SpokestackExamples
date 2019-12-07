@@ -30,6 +30,8 @@
 		01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */; };
 		01DF9698238C751400DC3A83 /* SafariView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01DF9697238C751400DC3A83 /* SafariView.swift */; };
 		01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F538D82380781C00367C91 /* FeedKit+Extensions.swift */; };
+		01FA103A239B5414004A1AA3 /* FeedFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01FA1039239B5414004A1AA3 /* FeedFooterView.swift */; };
+		01FA103C239B5481004A1AA3 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01FA103B239B5481004A1AA3 /* ImageView.swift */; };
 		D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +60,8 @@
 		01DF9695238C749F00DC3A83 /* CustomSafariViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSafariViewController.swift; sourceTree = "<group>"; };
 		01DF9697238C751400DC3A83 /* SafariView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariView.swift; sourceTree = "<group>"; };
 		01F538D82380781C00367C91 /* FeedKit+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FeedKit+Extensions.swift"; sourceTree = "<group>"; };
+		01FA1039239B5414004A1AA3 /* FeedFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedFooterView.swift; sourceTree = "<group>"; };
+		01FA103B239B5481004A1AA3 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		1957867B21CEA3876D41FE68 /* Pods_SpokestackRSSReader.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SpokestackRSSReader.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		71C186BE003D4E0DBE442724 /* Pods-SpokestackRSSReader.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpokestackRSSReader.debug.xcconfig"; path = "Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader.debug.xcconfig"; sourceTree = "<group>"; };
 		D68062BDDD01709279040487 /* Pods-SpokestackRSSReader.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SpokestackRSSReader.release.xcconfig"; path = "Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader.release.xcconfig"; sourceTree = "<group>"; };
@@ -91,6 +95,8 @@
 				011D48E3237DB6E200EA951E /* ContentView.swift */,
 				0174EBE02389AF3900A7EAA7 /* FeedCardView.swift */,
 				0174EBE22389B3AE00A7EAA7 /* FeedCardViewDivider.swift */,
+				01FA1039239B5414004A1AA3 /* FeedFooterView.swift */,
+				01FA103B239B5481004A1AA3 /* ImageView.swift */,
 				01DF9697238C751400DC3A83 /* SafariView.swift */,
 				011D48E1237DB6E200EA951E /* SceneDelegate.swift */,
 			);
@@ -333,6 +339,7 @@
 				016B539E2395B33400EE94EA /* Detect.mlmodel in Sources */,
 				01F538D92380781C00367C91 /* FeedKit+Extensions.swift in Sources */,
 				0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */,
+				01FA103C239B5481004A1AA3 /* ImageView.swift in Sources */,
 				0174EBE12389AF3900A7EAA7 /* FeedCardView.swift in Sources */,
 				01DF9698238C751400DC3A83 /* SafariView.swift in Sources */,
 				011D48E2237DB6E200EA951E /* SceneDelegate.swift in Sources */,
@@ -343,6 +350,7 @@
 				011D48E4237DB6E200EA951E /* ContentView.swift in Sources */,
 				0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */,
 				017B2A602382E84B004FA244 /* SpeechController.swift in Sources */,
+				01FA103A239B5414004A1AA3 /* FeedFooterView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
