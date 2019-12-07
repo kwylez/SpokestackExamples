@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		011AB469239C205900ADB1E6 /* AVPlayer+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011AB468239C205900ADB1E6 /* AVPlayer+Extensions.swift */; };
 		011D48E0237DB6E200EA951E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011D48DF237DB6E200EA951E /* AppDelegate.swift */; };
 		011D48E2237DB6E200EA951E /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011D48E1237DB6E200EA951E /* SceneDelegate.swift */; };
 		011D48E4237DB6E200EA951E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 011D48E3237DB6E200EA951E /* ContentView.swift */; };
@@ -36,6 +37,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		011AB468239C205900ADB1E6 /* AVPlayer+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVPlayer+Extensions.swift"; sourceTree = "<group>"; };
 		011D48DC237DB6E200EA951E /* SpokestackRSSReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SpokestackRSSReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		011D48DF237DB6E200EA951E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		011D48E1237DB6E200EA951E /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -205,6 +207,7 @@
 		01F538D72380780800367C91 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				011AB468239C205900ADB1E6 /* AVPlayer+Extensions.swift */,
 				01F538D82380781C00367C91 /* FeedKit+Extensions.swift */,
 			);
 			path = Extensions;
@@ -346,6 +349,7 @@
 				0197F23523982A2A002A1C6F /* RemoteImageController.swift in Sources */,
 				01347008237F5E2E00AD3588 /* RSSController.swift in Sources */,
 				016B539F2395B33400EE94EA /* Filter.mlmodel in Sources */,
+				011AB469239C205900ADB1E6 /* AVPlayer+Extensions.swift in Sources */,
 				01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */,
 				011D48E4237DB6E200EA951E /* ContentView.swift in Sources */,
 				0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */,
