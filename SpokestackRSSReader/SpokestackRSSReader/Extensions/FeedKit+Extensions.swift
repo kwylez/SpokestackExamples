@@ -11,6 +11,8 @@ import FeedKit
 
 extension RSSFeed {
     
+    /// Maps instances of `FeedKit.RSSFeed` to `RSSFeedItem`
+    /// - Returns:  Array<RSSFeedItem>
     func convert() -> Array<RSSFeedItem> {
         
         var feedItems: Array<RSSFeedItem> = []
@@ -21,9 +23,13 @@ extension RSSFeed {
             let link: String = rssFeedItem.link ?? "Link N/A"
             let description: String = rssFeedItem.description ?? "Description N/A"
             let publishedDate: Date = rssFeedItem.pubDate ?? Date()
-            let imageLink: String = rssFeedItem.media?.mediaThumbnails?.first?.attributes?.url ?? ""
+            let imageLink: String = ""
             
-            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description, imageLink: imageLink)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate,
+                                                    title: title,
+                                                    link: link,
+                                                    description: description,
+                                                    imageLink: imageLink)
             feedItems.append(feedItem)
         }
         
@@ -33,6 +39,8 @@ extension RSSFeed {
 
 extension JSONFeed {
     
+    /// Maps instances of `JSONFeed.RSSFeed` to `RSSFeedItem`
+    /// - Returns:  Array<RSSFeedItem>
     func convert() -> Array<RSSFeedItem> {
         
         var feedItems: Array<RSSFeedItem> = []
@@ -45,7 +53,11 @@ extension JSONFeed {
             let publishedDate: Date = rssFeedItem.datePublished ?? Date()
             let imageLink: String = rssFeedItem.image ?? ""
             
-            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description, imageLink: imageLink)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate,
+                                                    title: title,
+                                                    link: link,
+                                                    description: description,
+                                                    imageLink: imageLink)
             feedItems.append(feedItem)
         }
         
@@ -54,7 +66,9 @@ extension JSONFeed {
 }
 
 extension AtomFeed {
-    
+
+    /// Maps instances of `AtomFeed.RSSFeed` to `RSSFeedItem`
+    /// - Returns:  Array<RSSFeedItem>
     func convert() -> Array<RSSFeedItem> {
         
         var feedItems: Array<RSSFeedItem> = []
@@ -67,7 +81,11 @@ extension AtomFeed {
             let publishedDate: Date = rssFeedItem.published ?? Date()
             let imageLink: String = rssFeedItem.media?.mediaThumbnails?.first?.attributes?.url ?? ""
             
-            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate, title: title, link: link, description: description, imageLink: imageLink)
+            let feedItem: RSSFeedItem = RSSFeedItem(publishedDate: publishedDate,
+                                                    title: title,
+                                                    link: link,
+                                                    description: description,
+                                                    imageLink: imageLink)
             feedItems.append(feedItem)
         }
         

@@ -10,17 +10,30 @@ import Foundation
 
 struct App {
 
+    /// Message that is read when the app starts up
+    
     static let welcomeMessage: String = "Welcome to the latest TechCrunch Headlines"
+    
+    /// Time delay (in seconds) between reading each headline
     
     static let actionDelay: TimeInterval = 1.5
     
+    /// Button text on each item card
+    
     static let actionPhrase: String = "Tell me more"
+    
+    /// message that is read when all headlines have been read
     
     static let finishedMessage: String = "You're all caught up"
     
     struct Feed {
         
+        /// Text for navigation bar
+        
         static let heading: String = "TechCrunch"
+        
+        /// RSS Feed
+        /// Atom, JSON and RSS are supported
         
         static let feedURL: String = "https://feeds.feedburner.com/TechCrunch/"
     }

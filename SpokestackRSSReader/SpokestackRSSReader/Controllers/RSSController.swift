@@ -9,22 +9,31 @@
 import Foundation
 import FeedKit
 
+/// Typealias for callback signature that is invoked after a feed is parsed
+
 typealias RSSControllerParseCallback = (_ feedItems: Array<RSSFeedItem>) -> Void
 
+/// Controller class for controlling an RSS feed
 class RSSController {
     
     // MARK: Private (properties)
-    
+
+    /// URL of RSS feed
     private var feedURL: URL
     
     // MARK: Initializers
-    
+
+    /// Initializer
+    /// - Parameter url: URL of the RSS feed
     init(_ url: URL) {
         self.feedURL = url
     }
     
     // MARK: Internal (methods)
     
+    /// Using a global dispatch queue this method asynchronously parses the feed
+    /// and will return an array of `RSSFeedItem`'s on the main queue
+    /// - Parameter callback: RSSControllerParseCallback
     func parseFeed(_ callback: @escaping RSSControllerParseCallback) -> Void {
         
         let parser = FeedParser(URL: self.feedURL)

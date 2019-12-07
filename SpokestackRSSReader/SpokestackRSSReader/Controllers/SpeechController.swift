@@ -11,31 +11,35 @@ import Spokestack
 import Combine
 import AVFoundation
 
-extension AVPlayer {
-    
-    var spk_isPlaying: Bool {
-        return rate != 0 && error == nil
-    }
-}
-
+/// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
     // MARK: Internal (properties)
     
+    /// Subject that publishes the transcriped text to any subscribers
     let textPublisher = PassthroughSubject<String, Never>()
     
+    /// Subject that publishes the `AVPlayerItem` that finished playing to any subscribers
     let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
     // MARK: Private (properties)
     
+    /// Holds a references to any of the publishers to be cancelled during
+    /// deallocation
     private var subscriptions = Set<AnyCancellable>()
     
+    /// `AVPlayer` instance that will handle playback for the mp3
     private var player: AVPlayer = AVPlayer()
     
+    /// Optional instance of `TextToSpeech`
     private var tts: TextToSpeech?
     
+    /// Holds an array of `AVPlayerItem`'s that are waiting to be processeed
+    /// Once an item has finished playing it is removed from the queue
     private var queued: Array<AVPlayerItem> = []
     
+    /// Utterance that comes back from the ASR
+    /// All values are lowercased
     private var transcript: String = "" {
         
         didSet {
@@ -43,6 +47,7 @@ final class SpeechController: NSObject {
         }
     }
     
+    /// This is the primary client entry point to the SpokeStack framework.
     lazy private var pipeline: SpeechPipeline = {
 
         let c = SpeechConfiguration()
@@ -65,10 +70,12 @@ final class SpeechController: NSObject {
     
     // MARK: Initializers
     
+    /// Sets pipeline delegate to nil
     deinit {
         pipeline.speechDelegate = nil
     }
     
+    /// Initializes `tts` by setting this class as it's delegate and default `SpeechConfiguration`
     override init() {
         
         super.init()
@@ -77,22 +84,32 @@ final class SpeechController: NSObject {
     
     // MARK: Internal (methods)
     
+    /// Starts the `SpeechPipeline`
+    /// - Returns: Void
     func start() -> Void {
         self.pipeline.start()
     }
     
+    /// Stops the `SpeechPipeline`
+    /// - Returns: Void
     func stop() -> Void {
         self.pipeline.stop()
     }
     
+    /// Directly activates the `SpeechPipeline`'s Automatic Speech Recognizer (ASR)
+    /// - Returns: Void
     func activatePipelineASR() -> Void {
         self.pipeline.activate()
     }
-    
+
+    /// Directly de-activates the `SpeechPipeline`'s Automatic Speech Recognizer (ASR)
+    /// - Returns: Void
     func deactivatePipelineASR() -> Void {
         self.pipeline.deactivate()
     }
     
+    /// Passes the text  to the `TextToSpeech` instance for synthesizing
+    /// - Parameter text: Veribage that is expected to be synthesized and read back
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
@@ -101,18 +118,24 @@ final class SpeechController: NSObject {
     
     // MARK: Private (methods)
     
+    /// If the current transcript value contains the the `App.actionPhrase` then
+    /// the `textPublisher` instance will send it to any subscribers and the
+    /// `SpeechPipeline` is stopped.
     private func parse() -> Void {
 
         if self.transcript.contains(App.actionPhrase.lowercased()) {
-            print("should be parsing....")
+
             self.textPublisher.send(self.transcript)
             self.stop()
         }
     }
     
+    /// Sets the current `AVAudioSession` category to `.playAndRecord` and makes
+    /// it active. Plays the item and will listen for the item to end.
+    /// - Parameter playerItem: `AVPlayerItem` to play
     private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
 
-        /// Set the appropriate audio session
+        /// Set the appropriate audio session or bad things happen
         
         try? AVAudioSession.sharedInstance().setCategory(.playAndRecord)
         try? AVAudioSession.sharedInstance().setActive(true)
@@ -122,6 +145,9 @@ final class SpeechController: NSObject {
         self.listenToNotification(playerItem)
     }
     
+    /// Sets up `NSNotification.Name.AVPlayerItemDidPlayToEndTime` publisher
+    /// to receive the player item that has finished playing and send it out to any subscribers
+    /// - Parameter playerItem: `AVPlayerItem` that should be observed
     private func listenToNotification(_ playerItem: AVPlayerItem) -> Void {
         
         let _ = NotificationCenter.default
