@@ -14,7 +14,7 @@ final class RemoteImageController: ObservableObject {
     
     let id: String = UUID().uuidString
 
-    @Published private (set) var image: UIImage = RemoteImageController.defaultImage
+    private (set) var image: UIImage = RemoteImageController.defaultImage
     
     @Published private (set) var isValidImage: Bool = false
     
