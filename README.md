@@ -11,22 +11,18 @@ The SpokestackRSSReader showcases Spokestack's Text-to-Speech (TTS) functionalit
 
 ## Dependencies
 
-**Spokestack via CocoaPods**
-
-Open your terminal
-
-```
-cd /path/to/SpokestackExamples/SpokestackRSSReader
-pod install
-```
-
-This will add the latest version to project.
-
-**FeedKit via SPM**
-
-To parse the RSS feed the project utilizes [FeedKit](https://github.com/nmdias/FeedKit)
+* Spokestack (installed via CocoaPods)
+* FeedKit (installed via CocoaPods)
 
 ## Setup
+
+```
+git clone https://github.com/kwylez/SpokestackExamples
+cd SpokestackExamples/SpokestackRSSReader
+gem install cocoapods
+pod install
+open SpokestackRSSReader.xcworkspace
+```
 
 The customizations to the sample app include ([SpokestackRSSReader/SpokestackRSSReader/Configs/App.swift](SpokestackRSSReader/SpokestackRSSReader/Configs/App.swift)):
 
