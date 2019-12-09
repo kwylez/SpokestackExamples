@@ -1,4 +1,5 @@
 PODS:
+  - FeedKit (9.0.0)
   - filter_audio (0.4.3)
   - Spokestack-iOS (5.2.1):
     - filter_audio (~> 0.4.3)
@@ -8,21 +9,24 @@ PODS:
     - TensorFlowLiteC (= 1.14.0)
 
 DEPENDENCIES:
+  - FeedKit (~> 9.0)
   - Spokestack-iOS
 
 SPEC REPOS:
   trunk:
+    - FeedKit
     - filter_audio
     - Spokestack-iOS
     - TensorFlowLiteC
     - TensorFlowLiteSwift
 
 SPEC CHECKSUMS:
+  FeedKit: 9ffa2434af293df73ac069129900498b3f89cb2e
   filter_audio: 93822826dcc07a70f41a5a4b103cae97c9efde83
   Spokestack-iOS: 730f08dc7b6503ff964233e7d2df2046c0598ac4
   TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
   TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
 
-PODFILE CHECKSUM: bfcb7ee80a72587075e18b40409f7abe17e10f20
+PODFILE CHECKSUM: df80a3d78e086e641792eb01b58230c4a91371e4
 
 COCOAPODS: 1.8.4

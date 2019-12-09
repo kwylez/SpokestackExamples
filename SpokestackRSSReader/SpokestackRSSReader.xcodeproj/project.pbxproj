@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,7 +14,6 @@
 		011D48E6237DB6E400EA951E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 011D48E5237DB6E400EA951E /* Assets.xcassets */; };
 		011D48E9237DB6E400EA951E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 011D48E8237DB6E400EA951E /* Preview Assets.xcassets */; };
 		011D48EC237DB6E400EA951E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 011D48EA237DB6E400EA951E /* LaunchScreen.storyboard */; };
-		01347004237F562100AD3588 /* FeedKit in Frameworks */ = {isa = PBXBuildFile; productRef = 01347003237F562100AD3588 /* FeedKit */; };
 		01347006237F5E2700AD3588 /* RSSViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347005237F5E2700AD3588 /* RSSViewModel.swift */; };
 		01347008237F5E2E00AD3588 /* RSSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347007237F5E2E00AD3588 /* RSSController.swift */; };
 		0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347009237FA7DA00AD3588 /* RSSFeedItem.swift */; };
@@ -75,7 +74,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D495F35BE34B203B83F71502 /* Pods_SpokestackRSSReader.framework in Frameworks */,
-				01347004237F562100AD3588 /* FeedKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,6 +239,7 @@
 				011D48D8237DB6E200EA951E /* Sources */,
 				011D48D9237DB6E200EA951E /* Frameworks */,
 				011D48DA237DB6E200EA951E /* Resources */,
+				43A7447D1CBB12883825BB24 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -248,7 +247,6 @@
 			);
 			name = SpokestackRSSReader;
 			packageProductDependencies = (
-				01347003237F562100AD3588 /* FeedKit */,
 			);
 			productName = SpokestackRSSReader;
 			productReference = 011D48DC237DB6E200EA951E /* SpokestackRSSReader.app */;
@@ -279,7 +277,6 @@
 			);
 			mainGroup = 011D48D3237DB6E200EA951E;
 			packageReferences = (
-				01347002237F562100AD3588 /* XCRemoteSwiftPackageReference "FeedKit" */,
 			);
 			productRefGroup = 011D48DD237DB6E200EA951E /* Products */;
 			projectDirPath = "";
@@ -307,6 +304,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		43A7447D1CBB12883825BB24 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SpokestackRSSReader/Pods-SpokestackRSSReader-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		929EBFE063728918E37989BA /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -491,9 +505,10 @@
 			baseConfigurationReference = 71C186BE003D4E0DBE442724 /* Pods-SpokestackRSSReader.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"SpokestackRSSReader/Preview Content\"";
-				DEVELOPMENT_TEAM = XM4VAKDQL9;
+				DEVELOPMENT_TEAM = Z7TPYC529T;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = SpokestackRSSReader/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -502,6 +517,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.corywiles.SpokestackRSSReader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development io.spokestack.SpokestackRSSReader";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -512,9 +528,10 @@
 			baseConfigurationReference = D68062BDDD01709279040487 /* Pods-SpokestackRSSReader.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"SpokestackRSSReader/Preview Content\"";
-				DEVELOPMENT_TEAM = XM4VAKDQL9;
+				DEVELOPMENT_TEAM = Z7TPYC529T;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = SpokestackRSSReader/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -523,6 +540,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.corywiles.SpokestackRSSReader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development io.spokestack.SpokestackRSSReader";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -550,25 +568,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		01347002237F562100AD3588 /* XCRemoteSwiftPackageReference "FeedKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/nmdias/FeedKit";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		01347003237F562100AD3588 /* FeedKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 01347002237F562100AD3588 /* XCRemoteSwiftPackageReference "FeedKit" */;
-			productName = FeedKit;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 011D48D4237DB6E200EA951E /* Project object */;
 }
