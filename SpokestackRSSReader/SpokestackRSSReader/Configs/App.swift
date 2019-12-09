@@ -22,7 +22,7 @@ struct App {
     
     static let actionPhrase: String = "Tell me more"
     
-    /// message that is read when all headlines have been read
+    /// Message that is read when all headlines have been read
     
     static let finishedMessage: String = "You're all caught up"
     
