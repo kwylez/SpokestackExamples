@@ -34,6 +34,7 @@ class RSSController {
     /// Using a global dispatch queue this method asynchronously parses the feed
     /// and will return an array of `RSSFeedItem`'s on the main queue
     /// - Parameter callback: RSSControllerParseCallback
+    /// - Returns: Void
     func parseFeed(_ callback: @escaping RSSControllerParseCallback) -> Void {
         
         let parser = FeedParser(URL: self.feedURL)

@@ -110,6 +110,7 @@ final class SpeechController: NSObject {
     
     /// Passes the text  to the `TextToSpeech` instance for synthesizing
     /// - Parameter text: Veribage that is expected to be synthesized and read back
+    /// - Returns: Void
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
@@ -121,6 +122,7 @@ final class SpeechController: NSObject {
     /// If the current transcript value contains the the `App.actionPhrase` then
     /// the `textPublisher` instance will send it to any subscribers and the
     /// `SpeechPipeline` is stopped.
+    /// - Returns: Void
     private func parse() -> Void {
 
         if self.transcript.contains(App.actionPhrase.lowercased()) {
@@ -133,7 +135,8 @@ final class SpeechController: NSObject {
     /// Sets the current `AVAudioSession` category to `.playAndRecord` and makes
     /// it active. Plays the item and will listen for the item to end.
     /// - Parameter playerItem: `AVPlayerItem` to play
-    private func playOrQueueIfNecessary(_ playerItem: AVPlayerItem) -> Void {
+    /// - Returns: Void
+    private func playItem(_ playerItem: AVPlayerItem) -> Void {
 
         /// Set the appropriate audio session or bad things happen
         
@@ -148,6 +151,7 @@ final class SpeechController: NSObject {
     /// Sets up `NSNotification.Name.AVPlayerItemDidPlayToEndTime` publisher
     /// to receive the player item that has finished playing and send it out to any subscribers
     /// - Parameter playerItem: `AVPlayerItem` that should be observed
+    /// - Returns: Void
     private func listenToNotification(_ playerItem: AVPlayerItem) -> Void {
         
         let _ = NotificationCenter.default
@@ -168,31 +172,41 @@ final class SpeechController: NSObject {
 
 extension SpeechController: SpeechEventListener {
     
+    /// `SpeechPipeline` as been activated
     func activate() {
         print("did activate")
     }
     
+    /// `SpeechPipeline` as been de-activated. Sets the `transcript` to empty string
     func deactivate() {
         print("did deactivate \(self.transcript)")
         self.transcript = ""
     }
     
+    /// `SpeechPipeline` has encountered an error
+    /// - Parameter error: `Error`
     func didError(_ error: Error) {
         print("did didError \(error)")
     }
     
+    /// `SpeechPipeline` has received a trace value
+    /// - Parameter trace: `String` trace value
     func didTrace(_ trace: String) {
         print("did trace \(trace)")
     }
     
+    /// `SpeechPipeline` has been stopped
     func didStop() {
         print("didStop")
     }
     
+    /// `SpeechPipeline` has been started
     func didStart() {
         print("didStart")
     }
     
+    /// `SpeechPipeline` did recognize speech. The `transcript` value is set and `parse` is called.
+    /// - Parameter result: `SpeechContext`
     func didRecognize(_ result: SpeechContext) {
         
         print("didRecognize \(result.isSpeech) and transscript \(result.transcript)")
@@ -200,6 +214,7 @@ extension SpeechController: SpeechEventListener {
         self.parse()
     }
     
+    /// The `SpeechPipeline` ASR or Wakeword has timedout
     func didTimeout() {
         print("didTimeout")
     }
@@ -207,10 +222,13 @@ extension SpeechController: SpeechEventListener {
 
 extension SpeechController: PipelineDelegate {
     
+    /// The `PipelineDelegate ` has been initiated
     func didInit() {
         print("didInit")
     }
     
+    /// Setting up the `PipelineDelegate` has failed
+    /// - Parameter error: `String` error description
     func setupFailed(_ error: String) {
         print("error \(error)")
     }
@@ -218,10 +236,12 @@ extension SpeechController: PipelineDelegate {
 
 extension SpeechController: TextToSpeechDelegate {
     
+    /// The results from calling`parse`
+    /// - Parameter url: `URL` to the synth'd text to speech
     func success(url: URL) {
 
         let playerItem = AVPlayerItem(url: url)
-        self.playOrQueueIfNecessary(playerItem)
+        self.playItem(playerItem)
     }
     
     func failure(error: Error) {

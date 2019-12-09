@@ -90,8 +90,13 @@ struct FeedCardView: View {
     }
 }
 
-//struct FeedCardView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        FeedCardView(feedItem: RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "https://spokestack.io/", description: "This is my position"), currentItem: RSSFeedItem(title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund", link: "https://spokestack.io/", description: "This is my position"))
-//    }
-//}
+struct FeedCardView_Previews: PreviewProvider {
+    static var previews: some View {
+        FeedCardView(feedItem: RSSFeedItem(publishedDate: Date(),
+                                           title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund",
+                                           link: "https://spokestack.io/",
+                                           description: "This is my position",
+                                           imageLink: ""),
+                     currentItem: .constant(nil))
+    }
+}

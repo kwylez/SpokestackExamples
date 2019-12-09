@@ -10,10 +10,14 @@ import Foundation
 import Combine
 import AVFoundation
 
+/// Transform RSSFeedItem  information into values that can be displayed on a view.
+/// To aid in state management it is an `ObserverableObject`
 class RSSViewModel: ObservableObject {
 
     // MARK: Interneal (properties)
     
+    /// Read-only list of `RSSFeedItem`'s.
+    /// It will be published to any subscribers
     @Published private (set) var feedItems: Array<RSSFeedItem> = [] {
         
         didSet {
@@ -21,18 +25,27 @@ class RSSViewModel: ObservableObject {
         }
     }
     
+    /// Optional `RSSFeedItem` instance
+    /// It will be published to any subscribers
     @Published private (set) var currentItem: RSSFeedItem?
     
     // MARK: Private (properties)
     
+    /// Whether or not the current item's description is being read
     private var processingCurrentItemDescription: Bool = false
     
+    /// `SpeechController` instance
     private var speechController: SpeechController = SpeechController()
     
+    /// Holds instances of `AnyCancellable` which will be cancled on deallocation
     private var subscriptions = Set<AnyCancellable>()
     
+    /// Whether or not the entire feed has finished processing. When `true` the `App.finishedMessage`
+    /// is synthesized
     private var isFinished: Bool = false
     
+    /// Whether or not  the `App.welcomeMessage` has not been synthensized. If it hasn't and the
+    /// the `feedItems` property is not empty then call `processHeadlines`
     private var shouldAnnounceWelcome: Bool = true {
         
         didSet {
@@ -46,6 +59,8 @@ class RSSViewModel: ObservableObject {
         }
     }
     
+    /// Array of `RSSFeedItem`'s. Once an an item has finished playing it is removed from
+    /// the list.
     private var queuedItems: Array<RSSFeedItem> = []
     
     // MARK: Initializers
@@ -54,12 +69,19 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Internal (methods)
     
+    /// Passes the rss feed item description to the speech controller for processing
+    /// This will pause the next headline from being "read".
+    /// - Parameter description: `RSSFeedItem.description`
+    /// - Returns: Void
     func readArticleDescription(_ description: String) -> Void {
         
         self.processingCurrentItemDescription = true
         self.speechController.respond(description)
     }
     
+    /// Handles the logic of announcing the welcome text, loading the feed and
+    /// setting up the `speechController.textPublisher`
+    /// - Returns: Void
     func activateSpeech() -> Void {
         
         if self.shouldAnnounceWelcome {
@@ -80,12 +102,16 @@ class RSSViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    /// Deactivates the `speechController`'s pipleline ASR.
+    /// - Returns: Void
     func deactiveSpeech() -> Void {
         self.speechController.deactivatePipelineASR()
     }
     
     // MARK: Private (methods)
     
+    /// Loads / parses the rss feed
+    /// - Returns: Void
     private func load() -> Void {
         
         let feedURL: URL = URL(string: App.Feed.feedURL)!
@@ -98,6 +124,9 @@ class RSSViewModel: ObservableObject {
         })
     }
     
+    /// Processes each headline after it has finished playing
+    /// It is called after the `shouldAnnounceWelcome` has been set to false
+    /// - Returns: Void
     private func processHeadlines() -> Void {
 
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
@@ -134,6 +163,9 @@ class RSSViewModel: ObservableObject {
         }).store(in: &self.subscriptions)
     }
     
+    /// Handles processing the next `RSSFeedItem` in the `queuedItems`
+    /// if there is one
+    /// - Returns: Void
     private func processNextItem() -> Void {
         
         if self.processingCurrentItemDescription {

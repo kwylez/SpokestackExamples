@@ -22,7 +22,6 @@ struct SafariView: UIViewControllerRepresentable {
     // MARK: Internal (methods)
     
     func makeUIViewController(context: UIViewControllerRepresentableContext<SafariView>) -> CustomSafariViewController {
-        
         return CustomSafariViewController()
     }
 
