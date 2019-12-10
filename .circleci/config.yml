@@ -4,7 +4,7 @@ version: 2
 
 references:
   gems_cache_key: &gems_cache_key
-    bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
+    bundle-v1-{{ checksum "SpokestackRSSReader/Gemfile.lock" }}-{{ arch }}
 
   restore_gems_cache: &restore_gems_cache
     restore_cache:
@@ -40,7 +40,7 @@ jobs:
           no_output_timeout: 10m
 
       - store_artifacts:
-          path: ios/output/gym/SpokestackRSSReader.ipa
+          path: SpokestackRSSReader.ipa
           destination: /SpokestackRSSReader.ipa
 
   deploy:
@@ -56,17 +56,17 @@ jobs:
       - *restore_gems_cache
       - run:
           command: bundle install
-          working_directory: ios
+          working_directory: SpokestackRSSReader
       - *save_gems_cache
 
       - run:
           name: Build and deploy iOS ipa
           command: bundle exec fastlane deploy
-          working_directory: ios
+          working_directory: SpokestackRSSReader
           no_output_timeout: 10m
 
       - store_artifacts:
-          path: ios/output/gym/SpokestackRSSReader.ipa
+          path: SpokestackRSSReader.ipa
           destination: /SpokestackRSSReader.ipa
 
 workflows:
