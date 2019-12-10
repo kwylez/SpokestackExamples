@@ -22,9 +22,9 @@ fastlane assemble_build
 Push a new beta build to TestFlight
 
 Build the iOS app
-### beta
+### deploy
 ```
-fastlane beta
+fastlane deploy
 ```
 Push a new beta build to TestFlight
 

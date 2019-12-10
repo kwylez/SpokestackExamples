@@ -5,27 +5,17 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: setup_circle_ci" time="0.006751">
+      <testcase classname="fastlane.lanes" name="0: setup_circle_ci" time="0.005228">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: Switch to assemble_build lane" time="0.000884">
+      <testcase classname="fastlane.lanes" name="1: match" time="3.710222">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: match" time="5.707853">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="3: gym" time="30.447204">
-        
-      </testcase>
-    
-      
-      <testcase classname="fastlane.lanes" name="4: upload_to_testflight" time="847.375326">
+      <testcase classname="fastlane.lanes" name="2: gym" time="28.386571">
         
       </testcase>
     

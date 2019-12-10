@@ -1,0 +1,88 @@
+# Example iOS config: https://github.com/CircleCI-Public/circleci-demo-react-native/blob/master/.circleci/config.yml
+
+version: 2
+
+references:
+  gems_cache_key: &gems_cache_key
+    bundle-v1-{{ checksum "SpokestackRSSReader/Gemfile.lock" }}-{{ arch }}
+
+  restore_gems_cache: &restore_gems_cache
+    restore_cache:
+      key: *gems_cache_key
+
+  save_gems_cache: &save_gems_cache
+    save_cache:
+      key: *gems_cache_key
+      paths:
+        - vendor/bundle
+
+jobs:
+  build:
+    macos:
+      xcode: "11.2.1"
+    working_directory: ~/SpokestackRSSReader
+    environment:
+      FL_OUTPUT_DIR: output
+    shell: /bin/bash --login -o pipefail
+    steps:
+      - checkout
+
+      - *restore_gems_cache
+      - run:
+          command: bundle install
+          working_directory: SpokestackRSSReader
+      - *save_gems_cache
+
+      - run:
+          name: Build iOS ipa
+          command: bundle exec fastlane assemble_build
+          working_directory: SpokestackRSSReader
+          no_output_timeout: 10m
+
+      - store_artifacts:
+          path: SpokestackRSSReader.ipa
+          destination: /SpokestackRSSReader.ipa
+
+  deploy:
+    macos:
+      xcode: "11.2.1"
+    working_directory: ~/SpokestackRSSReader
+    environment:
+      FL_OUTPUT_DIR: output
+    shell: /bin/bash --login -o pipefail
+    steps:
+      - checkout
+
+      - *restore_gems_cache
+      - run:
+          command: bundle install
+          working_directory: SpokestackRSSReader
+      - *save_gems_cache
+
+      - run:
+          name: Build and deploy iOS ipa
+          command: bundle exec fastlane deploy
+          working_directory: SpokestackRSSReader
+          no_output_timeout: 10m
+
+      - store_artifacts:
+          path: SpokestackRSSReader.ipa
+          destination: /SpokestackRSSReader.ipa
+
+workflows:
+  version: 2
+  deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore:
+                - production
+      - deploy:
+          filters:
+            branches:
+              only:
+                - production
+            tags:
+              only:
+                - /\d+\.\d+\.\d+/
