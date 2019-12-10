@@ -9,6 +9,7 @@
 import Foundation
 import Combine
 import AVFoundation
+import UIKit
 
 /// Transform RSSFeedItem  information into values that can be displayed on a view.
 /// To aid in state management it is an `ObserverableObject`
@@ -129,6 +130,8 @@ class RSSViewModel: ObservableObject {
     /// - Returns: Void
     private func processHeadlines() -> Void {
 
+        UIApplication.shared.isIdleTimerDisabled = true
+        
         self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
 
             self.processingCurrentItemDescription = false
@@ -157,6 +160,7 @@ class RSSViewModel: ObservableObject {
                 
                     self.speechController.respond(App.finishedMessage)
                     self.isFinished.toggle()
+                    UIApplication.shared.isIdleTimerDisabled = false
                 }
             }
             
