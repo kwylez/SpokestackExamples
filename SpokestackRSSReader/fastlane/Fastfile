@@ -32,7 +32,7 @@ lane :assemble_build do
 end
 
 desc "Push a new beta build to TestFlight"
-lane :beta do
+lane :deploy do
 	assemble_build
 	upload_to_testflight
 end
