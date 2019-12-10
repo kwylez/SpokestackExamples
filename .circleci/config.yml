@@ -6,20 +6,6 @@ references:
   gems_cache_key: &gems_cache_key
     bundle-v1-{{ checksum "Gemfile.lock" }}-{{ arch }}
 
-  restore_yarn_cache: &restore_yarn_cache
-    restore_cache:
-      keys:
-        # when lock file changes, use increasingly general patterns to restore cache
-        - yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn.lock" }}
-        - yarn-packages-v4-{{ .Branch }}-
-        - yarn-packages-v4-
-
-  save_yarn_cache: &save_yarn_cache
-    save_cache:
-      paths:
-        - node_modules/
-      key: yarn-packages-v4-{{ .Branch }}-{{ checksum "yarn.lock" }}
-
   restore_gems_cache: &restore_gems_cache
     restore_cache:
       key: *gems_cache_key
@@ -40,9 +26,6 @@ jobs:
     shell: /bin/bash --login -o pipefail
     steps:
       - checkout
-      - *restore_yarn_cache
-      - run: yarn --prod --frozen-lockfile
-      - *save_yarn_cache
 
       - *restore_gems_cache
       - run:
@@ -69,9 +52,6 @@ jobs:
     shell: /bin/bash --login -o pipefail
     steps:
       - checkout
-      - *restore_yarn_cache
-      - run: yarn --prod --frozen-lockfile
-      - *save_yarn_cache
 
       - *restore_gems_cache
       - run:
