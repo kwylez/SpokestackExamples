@@ -64,7 +64,12 @@ class RSSController {
             }
             
             DispatchQueue.main.async {
-                callback(feedItems)
+                
+                let endIndex: Int = App.Feed.numberOfItemsToDisplay - 1
+                let feedRange: ArraySlice<RSSFeedItem> = feedItems[0...endIndex]
+                let items: Array<RSSFeedItem> = Array(feedRange)
+                
+                callback(items)
             }
         }
     }

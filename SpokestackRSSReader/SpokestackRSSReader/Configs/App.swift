@@ -36,5 +36,9 @@ struct App {
         /// Atom, JSON and RSS are supported
         
         static let feedURL: String = "https://feeds.feedburner.com/TechCrunch/"
+        
+        /// The number of articles to display and read
+
+        static let numberOfItemsToDisplay: Int = 5
     }
 }
