@@ -140,7 +140,14 @@ final class SpeechController: NSObject {
 
         /// Set the appropriate audio session or bad things happen
         
-        try? AVAudioSession.sharedInstance().setCategory(.playAndRecord)
+        try? AVAudioSession.sharedInstance().setCategory(.playAndRecord,
+                                                         options: [
+                                                            .allowAirPlay,
+                                                            .allowBluetooth,
+                                                            .allowBluetoothA2DP,
+                                                            .defaultToSpeaker
+                                                         ]
+        )
         try? AVAudioSession.sharedInstance().setActive(true)
         
         self.player = AVPlayer(playerItem: playerItem)

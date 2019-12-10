@@ -32,3 +32,4 @@ The customizations to the sample app include ([SpokestackRSSReader/SpokestackRSS
 * Finished message: Message that is read when all headlines have been read
 * Heading: Text for navigation bar
 * Feed URL: Link to the RSS feed that you want to process
+* Number of Feed Items to display: Defaults to 5
