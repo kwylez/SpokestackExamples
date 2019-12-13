@@ -32,5 +32,9 @@ struct RSSFeedItem: Identifiable {
     /// Link to an image that represents the article.
     /// The default is "" because on `JSONFeed` supports this property
     let imageLink: String
+    
+    var cachedHeadlineLink: URL?
+    
+    var cachedDescriptionLink: URL?
 }
 

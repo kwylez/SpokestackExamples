@@ -12,11 +12,11 @@ struct App {
 
     /// Message that is read when the app starts up
     
-    static let welcomeMessage: String = "Welcome to the latest TechCrunch Headlines"
+    static let welcomeMessage: String = "Welcome to the latest TechCrunch Headlines. Please stand by for processing"
     
     /// Time delay (in seconds) between reading each headline
     
-    static let actionDelay: TimeInterval = 1.5
+    static let actionDelay: TimeInterval = 3.5
     
     /// Button text on each item card
     

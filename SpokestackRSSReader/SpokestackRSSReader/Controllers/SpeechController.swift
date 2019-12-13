@@ -22,6 +22,8 @@ final class SpeechController: NSObject {
     /// Subject that publishes the `AVPlayerItem` that finished playing to any subscribers
     let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
+    let synthesizeFeedItemHasFinished = PassthroughSubject<RSSFeedItem, Never>()
+    
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
     
     // MARK: Private (properties)
@@ -45,6 +47,10 @@ final class SpeechController: NSObject {
     /// Holds an array of `AVPlayerItem`'s that are waiting to be processeed
     /// Once an item has finished playing it is removed from the queue
     private var queued: Array<AVPlayerItem> = []
+    
+    private var itemTTSType: RSSFeedItemTTSType?
+    
+    private var feedItem: RSSFeedItem?
     
     /// Utterance that comes back from the ASR
     /// All values are lowercased
@@ -134,6 +140,22 @@ final class SpeechController: NSObject {
         self.playItem(playerItem)
     }
     
+    func fetchTTSFile(_ feedItem: RSSFeedItem, itemTTSType: RSSFeedItemTTSType) -> Void {
+        
+        self.feedItem = feedItem
+        self.itemTTSType = itemTTSType
+        
+        switch itemTTSType {
+            
+        case .headline:
+            self.respond(feedItem.title)
+            break
+        case .description:
+            self.respond(feedItem.description)
+            break
+        }
+    }
+    
     // MARK: Private (methods)
     
     /// If the current transcript value contains the the `App.actionPhrase` then
@@ -184,9 +206,6 @@ final class SpeechController: NSObject {
             .sink(
                 receiveCompletion: {_ in },
                 receiveValue: { value in
-                    
-                    print("what is my value \(String(describing: value))")
-
                     self.itemFinishedPublisher.send(value)
                 }
             )
@@ -312,16 +331,32 @@ extension SpeechController: TextToSpeechDelegate {
             }
             
         }, receiveValue: {data in
-            
-            let filename: String = UUID().uuidString + ".mp3"
+                        
+            if var currentItem: RSSFeedItem = self.feedItem,
+                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
+                
+                let filename: String = UUID().uuidString + ".mp3"
 
-            let documentDirectory: URL = FileManager.spk_documentsDir!
-            let fileURL: URL = documentDirectory.appendingPathComponent(filename)
-            
-            try? data.write(to: fileURL)
-            
-            print("what is the fileURL \(fileURL)")
-            self.synthesizeHasFinished.send(fileURL)
+                let documentDirectory: URL = FileManager.spk_documentsDir!
+                let fileURL: URL = documentDirectory.appendingPathComponent(filename)
+                
+                try? data.write(to: fileURL)
+                
+                if itemTTSType == .headline {
+                    
+                    currentItem.cachedHeadlineLink = fileURL
+                    
+                } else {
+                    
+                    currentItem.cachedDescriptionLink = fileURL
+                }
+                print("off you go current item \(currentItem)")
+                self.synthesizeFeedItemHasFinished.send(currentItem)
+
+            } else {
+
+                self.synthesizeHasFinished.send(url)
+            }
         })
         .store(in: &self.subscriptions)
     }
