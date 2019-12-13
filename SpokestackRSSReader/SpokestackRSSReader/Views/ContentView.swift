@@ -43,7 +43,7 @@ struct ContentView: View {
                         
                         FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
                             
-                            self.viewModel.readArticleDescription(feedItem.description)
+                            self.viewModel.readArticleDescription(feedItem)
 
                         }, seeMoreCallback: {url in
 
