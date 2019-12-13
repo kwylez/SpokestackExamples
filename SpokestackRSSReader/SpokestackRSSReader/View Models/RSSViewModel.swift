@@ -34,6 +34,31 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Private (properties)
     
+    private var finishedCachingHeadlines: Bool = false {
+        
+        didSet {
+        
+            if finishedCachingHeadlines {
+                print("what are urls \(cachedHeadlineURLs)")
+            }
+        }
+    }
+    
+    private var finishedCachingDescriptions: Bool = false {
+        
+        didSet {
+        
+            if finishedCachingDescriptions {
+                print("what are finishedCachingDescriptions urls \(cachedDescriptionURLs)")
+                self.processHeadlines()
+            }
+        }
+    }
+    
+    private var cachedHeadlineURLs: Array<URL> = []
+    
+    private var cachedDescriptionURLs: Array<URL> = []
+    
     /// Whether or not the current item's description is being read
     private var processingCurrentItemDescription: Bool = false
     
@@ -54,18 +79,19 @@ class RSSViewModel: ObservableObject {
     
     /// Whether or not  the `App.welcomeMessage` has not been synthensized. If it hasn't and the
     /// the `feedItems` property is not empty then call `processHeadlines`
-    private var shouldAnnounceWelcome: Bool = true {
-        
-        didSet {
-            
-            if !shouldAnnounceWelcome {
-    
-                if !self.feedItems.isEmpty {
-                    self.processHeadlines()
-                }
-            }
-        }
-    }
+    private var shouldAnnounceWelcome: Bool = true
+//    private var shouldAnnounceWelcome: Bool = true {
+//
+//        didSet {
+//
+//            if !shouldAnnounceWelcome {
+//
+//                if !self.feedItems.isEmpty {
+//                    self.processHeadlines()
+//                }
+//            }
+//        }
+//    }
     
     /// Array of `RSSFeedItem`'s. Once an an item has finished playing it is removed from
     /// the list.
@@ -92,15 +118,17 @@ class RSSViewModel: ObservableObject {
     /// - Returns: Void
     func activateSpeech() -> Void {
         
-        if self.shouldAnnounceWelcome {
-
-            self.speechController.respond(App.welcomeMessage)
-            self.load()
-
-        } else {
-
-            self.load()
-        }
+//        if self.shouldAnnounceWelcome {
+//
+////            self.speechController.respond(App.welcomeMessage)
+//            self.load()
+//
+//        } else {
+//
+//            self.load()
+//        }
+        
+        self.load()
 
         self.speechController.textPublisher.sink( receiveCompletion: { _ in },
                                                   receiveValue: { [unowned self] value in
@@ -128,9 +156,79 @@ class RSSViewModel: ObservableObject {
         rssController.parseFeed({[unowned self] feedItems in
             
             self.feedItems = feedItems
-            /// Tell the speech controller to cache mp3's and then send publisher that it is done
-            self.shouldAnnounceWelcome.toggle()
+            self.cachItems()
         })
+    }
+    
+    private func cachItems() -> Void {
+        
+        /// Headlines
+        
+        self.cacheHeadlines()
+
+        /// First start with the welcome
+        
+        self.speechController.respond(App.welcomeMessage)
+        
+        ///
+        
+        let headlines: Array<String> = self.feedItems.map{ $0.title }
+        
+        headlines.forEach {
+            self.speechController.respond($0)
+        }
+        
+        /// Description
+    }
+    
+    private func cacheHeadlines() -> Void {
+        
+        self.speechController.synthesizeHasFinished
+        .receive(on: RunLoop.main)
+        .sink(receiveValue: {[unowned self] url in
+
+            if self.shouldAnnounceWelcome || (self.cachedHeadlineURLs.count == self.feedItems.count) {
+                
+                self.speechController.play(url)
+                self.shouldAnnounceWelcome.toggle()
+                return
+            }
+            
+            self.cachedHeadlineURLs.append(url)
+
+            if self.cachedHeadlineURLs.count == self.feedItems.count {
+
+                self.finishedCachingHeadlines = true
+                self.cacheDescriptions()
+            }
+        })
+        .store(in: &self.subscriptions)
+    }
+    
+    private func cacheDescriptions() -> Void {
+        
+        if self.finishedCachingDescriptions {
+            return
+        }
+        
+        self.speechController.synthesizeHasFinished
+        .receive(on: RunLoop.main)
+        .sink(receiveValue: {[unowned self] url in
+
+            self.cachedDescriptionURLs.append(url)
+            
+            if self.cachedDescriptionURLs.count == self.feedItems.count {
+                self.finishedCachingDescriptions = true
+            }
+        })
+        .store(in: &self.subscriptions)
+        
+        let descriptions: Array<String> = self.feedItems.map{ $0.description }
+        
+        descriptions.forEach {
+            print("response with description \($0)")
+            self.speechController.respond($0)
+        }
     }
     
     /// Processes each headline after it has finished playing
@@ -149,11 +247,14 @@ class RSSViewModel: ObservableObject {
             
             if self.feedItems.count == self.queuedItems.count {
                 
-                if let item: RSSFeedItem = self.queuedItems.first {
+                if let item: RSSFeedItem = self.queuedItems.first,
+                    let headlineURL: URL = self.cachedHeadlineURLs.first {
 
                     self.queuedItems.remove(at: 0)
+                    self.cachedHeadlineURLs.remove(at: 0)
                     self.currentItem = item
-                    self.speechController.respond(item.title)
+//                    self.speechController.respond(item.title)
+                    self.speechController.play(headlineURL)
                 }
                 
             } else if !self.queuedItems.isEmpty {

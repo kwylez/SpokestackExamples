@@ -22,6 +22,8 @@ final class SpeechController: NSObject {
     /// Subject that publishes the `AVPlayerItem` that finished playing to any subscribers
     let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
+    let synthesizeHasFinished = PassthroughSubject<URL, Never>()
+    
     // MARK: Private (properties)
     
     /// Holds a references to any of the publishers to be cancelled during
@@ -127,6 +129,11 @@ final class SpeechController: NSObject {
         self.tts?.synthesize(input)
     }
     
+    func play(_ url: URL) -> Void {
+        let playerItem = AVPlayerItem(url: url)
+        self.playItem(playerItem)
+    }
+    
     // MARK: Private (methods)
     
     /// If the current transcript value contains the the `App.actionPhrase` then
@@ -184,6 +191,14 @@ final class SpeechController: NSObject {
                 }
             )
             .store(in: &self.subscriptions)
+    }
+    
+    private func fetchSoundFile(_ remoteURL: URL) -> AnyPublisher<Data, Error> {
+        
+        return URLSession.shared.dataTaskPublisher(for: remoteURL)
+        .mapError { $0 as Error }
+        .map { $0.data }
+        .eraseToAnyPublisher()
     }
 }
 
@@ -284,8 +299,31 @@ extension SpeechController: TextToSpeechDelegate {
     /// - Parameter url: `URL` to the synth'd text to speech
     func success(url: URL) {
 
-        let playerItem = AVPlayerItem(url: url)
-        self.playItem(playerItem)
+        /// Save the local URL
+        
+        self.fetchSoundFile(url).sink(receiveCompletion: {completion in
+            
+            print(".sink() received the completion", String(describing: completion))
+            switch completion {
+                case .finished:
+                    break
+                case .failure(let anError):
+                    print("received error: ", anError)
+            }
+            
+        }, receiveValue: {data in
+            
+            let filename: String = UUID().uuidString + ".mp3"
+
+            let documentDirectory: URL = FileManager.spk_documentsDir!
+            let fileURL: URL = documentDirectory.appendingPathComponent(filename)
+            
+            try? data.write(to: fileURL)
+            
+            print("what is the fileURL \(fileURL)")
+            self.synthesizeHasFinished.send(fileURL)
+        })
+        .store(in: &self.subscriptions)
     }
     
     func failure(error: Error) {
