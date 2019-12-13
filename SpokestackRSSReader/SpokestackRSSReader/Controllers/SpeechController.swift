@@ -141,17 +141,17 @@ final class SpeechController: NSObject {
     }
     
     func fetchTTSFile(_ feedItem: RSSFeedItem, itemTTSType: RSSFeedItemTTSType) -> Void {
-        
+
         self.feedItem = feedItem
         self.itemTTSType = itemTTSType
         
         switch itemTTSType {
             
         case .headline:
-            self.respond(feedItem.title)
+            self.respond(self.feedItem!.title)
             break
         case .description:
-            self.respond(feedItem.description)
+            self.respond(self.feedItem!.description)
             break
         }
     }
@@ -213,7 +213,7 @@ final class SpeechController: NSObject {
     }
     
     private func fetchSoundFile(_ remoteURL: URL) -> AnyPublisher<Data, Error> {
-        
+
         return URLSession.shared.dataTaskPublisher(for: remoteURL)
         .mapError { $0 as Error }
         .map { $0.data }
@@ -320,9 +320,9 @@ extension SpeechController: TextToSpeechDelegate {
 
         /// Save the local URL
         
-        self.fetchSoundFile(url).sink(receiveCompletion: {completion in
-            
-            print(".sink() received the completion", String(describing: completion))
+        self.fetchSoundFile(url)
+            .sink(receiveCompletion: {completion in
+
             switch completion {
                 case .finished:
                     break
@@ -350,8 +350,9 @@ extension SpeechController: TextToSpeechDelegate {
                     
                     currentItem.cachedDescriptionLink = fileURL
                 }
-                print("off you go current item \(currentItem)")
+
                 self.synthesizeFeedItemHasFinished.send(currentItem)
+                self.feedItem = nil
 
             } else {
 

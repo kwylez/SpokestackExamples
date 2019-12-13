@@ -124,56 +124,77 @@ class RSSViewModel: ObservableObject {
         let feedURL: URL = URL(string: App.Feed.feedURL)!
         let rssController: RSSController = RSSController(feedURL)
 
-
+        self.cacheItems()
+        self.processHeadlines()
         self.speechController.respond(App.welcomeMessage)
         
         rssController.parseFeed({[unowned self] feedItems in
             self.feedItems = feedItems
         })
-        self.cacheItems()
-        self.processHeadlines()
     }
     
     private func cacheItems() -> Void {
         
         self.speechController.synthesizeFeedItemHasFinished
+        .handleEvents(receiveSubscription: { _ in
+          print("Network request will start")
+        }, receiveOutput: { output in
+          print("Network request data received \(output)")
+        }, receiveCancel: {
+          print("Network request cancelled")
+        })
+        .print("fetch publisher")
         .receive(on: RunLoop.main)
         .sink(receiveValue: {[unowned self] feedItem in
             
             if !self.hasFinishedCachingHeadlineURLS {
             
-                if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.link == feedItem.link }) {
+                if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.id == feedItem.id }) {
+                    print("what is index for desc \(indexOfFeedItem) and feed id \(feedItem.id)")
                     self.feedItems[indexOfFeedItem] = feedItem
                 }
 
                 self.processedHeadlineURLS += 1
+                self.processNextHeadline()
 
                 if self.hasFinishedCachingHeadlineURLS {
-                    
-                    self.feedItems.forEach {
-                        self.speechController.fetchTTSFile($0, itemTTSType: .description)
-                    }
+                    self.initiateDescriptionCaching()
                 }
                 
                 return
             }
             
             if !self.hasFinishedCachingDescriptionURLS {
-                
-                if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.link == feedItem.link }) {
+
+                if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.id == feedItem.id }) {
                     self.feedItems[indexOfFeedItem] = feedItem
                 }
-                
+
                 self.processedDescriptionURLS += 1
-                
+                self.processNextDescription()
+
                 if self.hasFinishedCachingURLS {
                     self.startPlayback()
                 }
-                
+
                 return
             }
         })
         .store(in: &self.subscriptions)
+    }
+    
+    private func processNextHeadline() -> Void {
+        
+        if self.processedHeadlineURLS < self.feedItems.count {
+            self.speechController.fetchTTSFile(self.feedItems[self.processedHeadlineURLS], itemTTSType: .headline)
+        }
+    }
+    
+    private func processNextDescription() -> Void {
+        
+        if self.processedDescriptionURLS < self.feedItems.count {
+            self.speechController.fetchTTSFile(self.feedItems[self.processedDescriptionURLS], itemTTSType: .description)
+        }
     }
     
     private func startPlayback() -> Void {
@@ -192,11 +213,16 @@ class RSSViewModel: ObservableObject {
         }
     }
     
-    private func initiateFeedPlayback() -> Void {
+    private func initiateHeadlineCaching() -> Void {
 
-        self.feedItems.forEach {
-            self.speechController.fetchTTSFile($0, itemTTSType: .headline)
-        }
+        let firstItemIndex: Int = 0
+        self.speechController.fetchTTSFile(self.feedItems[firstItemIndex], itemTTSType: .headline)
+    }
+    
+    private func initiateDescriptionCaching() -> Void {
+
+        let firstItemIndex: Int = 0
+        self.speechController.fetchTTSFile(self.feedItems[firstItemIndex], itemTTSType: .description)
     }
     
     /// Processes each headline after it has finished playing
@@ -205,67 +231,73 @@ class RSSViewModel: ObservableObject {
     private func processHeadlines() -> Void {
 
         UIApplication.shared.isIdleTimerDisabled = true
-        
-        self.speechController.itemFinishedPublisher.sink(receiveCompletion: {_ in }, receiveValue: {value in
+
+        self.speechController.itemFinishedPublisher
+            .sink(receiveCompletion: {_ in }, receiveValue: {value in
 
             self.processingCurrentItemDescription = false
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
             /// and the queued items are the same
-            
+
             if !self.queuedItems.isEmpty {
 
                 self.workerItem = DispatchWorkItem { [weak self] in
-                    
+
                     guard let strongSelf = self else {
                         return
                     }
-                    
+
                     if !strongSelf.workerItem.isCancelled {
-                        print("Not cancelled so start")
                         strongSelf.speechController.activatePipelineASR()
                     } else {
-                        print("The work item is cancelled")
                         strongSelf.speechController.stop()
                     }
-                    
+
                     self?.workerItem = nil
                 }
-                
+
                 workItemQueue.async(execute: self.workerItem)
                 workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
-                    
+
                     DispatchQueue.main.async {
                         self?.workerItem?.cancel()
                         self?.processNextItem()
                     }
                 }
-                
+
             } else if !self.hasFinishedCachingHeadlineURLS {
-                
-                self.initiateFeedPlayback()
+
+                self.initiateHeadlineCaching()
+
+            } else {
+             
+                if self.queuedItems.isEmpty && !self.isFinished {
+                    
+                    UIApplication.shared.isIdleTimerDisabled = false
+                    
+                    self.deactiveSpeech()
+                    self.speechController.respond(App.finishedMessage)
+                }
             }
-            
-        }).store(in: &self.subscriptions)
-        
+        })
+        .store(in: &self.subscriptions)
+
         self.speechController.synthesizeHasFinished.sink(receiveValue: {url in
 
-            if self.shouldAnnounceWelcome {
+            self.speechController.play(url)
             
+            if self.shouldAnnounceWelcome {
+
                 self.speechController.play(url)
                 self.shouldAnnounceWelcome.toggle()
-//                self.feedItems.forEach {
-//                    self.speechController.fetchTTSFile($0, itemTTSType: .headline)
-//                }
+
                 return
             }
-            
-//            if !self.isFinished {
-//
-//                self.speechController.respond(App.finishedMessage)
-//                self.isFinished.toggle()
-//                UIApplication.shared.isIdleTimerDisabled = false
-//            }
+
+            if !self.isFinished {
+                self.isFinished.toggle()
+            }
         })
         .store(in: &self.subscriptions)
     }
@@ -285,6 +317,7 @@ class RSSViewModel: ObservableObject {
             self.queuedItems.remove(at: 0)
             self.currentItem = nextItem
             self.speechController.play(headlineURL)
+
         }
     }
 }
