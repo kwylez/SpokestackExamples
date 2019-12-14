@@ -33,18 +33,26 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Private (properties)
     
+    /// Gives a count of how many headline texts that have been processed
     private var processedHeadlineURLS: Int = 0
     
+    /// Gives a count of how many description texts that have been processed
     private var processedDescriptionURLS: Int = 0
     
+    /// Computed propery that returns true if the `feedItems.count` and
+    /// `processedHeadlineURLS` are the same
     private var hasFinishedCachingHeadlineURLS: Bool {
         return self.feedItems.count == self.processedHeadlineURLS
     }
     
+    /// Computed propery that returns true if the `feedItems.count` and
+    /// `processedDescriptionURLS` are the same
     private var hasFinishedCachingDescriptionURLS: Bool {
         return self.feedItems.count == self.processedDescriptionURLS
     }
     
+    /// Computed propery that returns true if  `hasFinishedCachingHeadlineURLS` and
+    /// `hasFinishedCachingDescriptionURLS` are the same
     private var hasFinishedCachingURLS: Bool {
         return self.hasFinishedCachingHeadlineURLS && self.hasFinishedCachingDescriptionURLS
     }
@@ -133,6 +141,10 @@ class RSSViewModel: ObservableObject {
         })
     }
     
+    /// Sets up subscriber to handle received cached item events from the
+    /// `SpeechController.synthesizeFeedItemHasFinished`
+    /// publisher
+    /// - Returns: Void
     private func cacheItems() -> Void {
         
         self.speechController.synthesizeFeedItemHasFinished
@@ -147,22 +159,29 @@ class RSSViewModel: ObservableObject {
         .receive(on: RunLoop.main)
         .sink(receiveValue: {[unowned self] feedItem in
             
+            /// First check to see if the headlines have finished processing
+            /// if they aren't then process the next headline
+            
             if !self.hasFinishedCachingHeadlineURLS {
             
                 if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.id == feedItem.id }) {
-                    print("what is index for desc \(indexOfFeedItem) and feed id \(feedItem.id)")
                     self.feedItems[indexOfFeedItem] = feedItem
                 }
 
                 self.processedHeadlineURLS += 1
                 self.processNextHeadline()
 
+                /// Once the headline are done caching, initiate the description caching
+                
                 if self.hasFinishedCachingHeadlineURLS {
                     self.initiateDescriptionCaching()
                 }
                 
                 return
             }
+            
+            /// If the descriptions haven't finished caching then process the next
+            /// one. Once they are finished then start playback
             
             if !self.hasFinishedCachingDescriptionURLS {
 
@@ -183,13 +202,18 @@ class RSSViewModel: ObservableObject {
         .store(in: &self.subscriptions)
     }
     
+    /// If `processedHeadlineURLS`  is less than the number of `feedItems`
+    /// then the next headline will be processed by the `speechController` instance
+    /// - Returns: Void
     private func processNextHeadline() -> Void {
         
         if self.processedHeadlineURLS < self.feedItems.count {
             self.speechController.fetchTTSFile(self.feedItems[self.processedHeadlineURLS], itemTTSType: .headline)
         }
     }
-    
+    /// If `processedHeadlineURLS`  is less than the number of `feedItems`
+    /// then the next headline will be processed by the `speechController` instance
+    /// - Returns: Void
     private func processNextDescription() -> Void {
         
         if self.processedDescriptionURLS < self.feedItems.count {
@@ -197,6 +221,8 @@ class RSSViewModel: ObservableObject {
         }
     }
     
+    /// Starts playback of the `feedItems`
+    /// - Returns: Void
     private func startPlayback() -> Void {
         
         self.queuedItems = self.feedItems
@@ -213,12 +239,16 @@ class RSSViewModel: ObservableObject {
         }
     }
     
+    /// Fetches the TTS file for the first `RSSFeedItem`'s headline
+    /// - Returns: Void
     private func initiateHeadlineCaching() -> Void {
 
         let firstItemIndex: Int = 0
         self.speechController.fetchTTSFile(self.feedItems[firstItemIndex], itemTTSType: .headline)
     }
-    
+
+    /// Fetches the TTS file for the first `RSSFeedItem`'s description
+    /// - Returns: Void
     private func initiateDescriptionCaching() -> Void {
 
         let firstItemIndex: Int = 0
@@ -242,6 +272,10 @@ class RSSViewModel: ObservableObject {
 
             if !self.queuedItems.isEmpty {
 
+                /// The work item is what will  handle activating the pipleline's ASR
+                /// if after the `App.actionDelay` value and it hasn't been activated
+                /// then the next item will be processed
+
                 self.workerItem = DispatchWorkItem { [weak self] in
 
                     guard let strongSelf = self else {
@@ -257,6 +291,8 @@ class RSSViewModel: ObservableObject {
                     self?.workerItem = nil
                 }
 
+                /// Execute the `workerItem`
+
                 workItemQueue.async(execute: self.workerItem)
                 workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
 
@@ -268,10 +304,17 @@ class RSSViewModel: ObservableObject {
 
             } else if !self.hasFinishedCachingHeadlineURLS {
 
+                /// Process the headline caching
+                
                 self.initiateHeadlineCaching()
 
             } else {
              
+                /// If the `queuedItems` is finished, but the `App.finishedMessage`
+                /// hasn't been processed the turn on screen dimming (`UIApplication.shared.isIdleTimerDisabled`)
+                /// deactivate speech and have the `speechController`
+                /// respond to the `App.finishedMessage`
+
                 if self.queuedItems.isEmpty && !self.isFinished {
                     
                     UIApplication.shared.isIdleTimerDisabled = false
@@ -283,6 +326,8 @@ class RSSViewModel: ObservableObject {
         })
         .store(in: &self.subscriptions)
 
+        /// Subscriber that will handle when a synthesize item has finished and the `URL` has
+        /// been received
         self.speechController.synthesizeHasFinished.sink(receiveValue: {url in
 
             self.speechController.play(url)

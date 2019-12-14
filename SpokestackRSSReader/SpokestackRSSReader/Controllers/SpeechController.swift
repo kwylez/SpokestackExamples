@@ -22,8 +22,10 @@ final class SpeechController: NSObject {
     /// Subject that publishes the `AVPlayerItem` that finished playing to any subscribers
     let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
+    /// Subject that publishes when a feed item has been sythesized and cached
     let synthesizeFeedItemHasFinished = PassthroughSubject<RSSFeedItem, Never>()
     
+    /// Subject that publishes when a synthesized item is finished and sends the remote URL
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
     
     // MARK: Private (properties)
@@ -48,8 +50,10 @@ final class SpeechController: NSObject {
     /// Once an item has finished playing it is removed from the queue
     private var queued: Array<AVPlayerItem> = []
     
+    /// The `RSSFeedItemTTSType` enum
     private var itemTTSType: RSSFeedItemTTSType?
     
+    /// The current `RSSFeedItem` instance that is being processed
     private var feedItem: RSSFeedItem?
     
     /// Utterance that comes back from the ASR
@@ -135,11 +139,20 @@ final class SpeechController: NSObject {
         self.tts?.synthesize(input)
     }
     
+    /// Plays `AVPlayerItem` instance for the given url
+    /// - Parameter url: `URL` of sound file
+    /// - Returns: Void
     func play(_ url: URL) -> Void {
+        
         let playerItem = AVPlayerItem(url: url)
         self.playItem(playerItem)
     }
     
+    /// Fetches the  `URL` for either the `RSSFeedItem`'s `title` or `description` property
+    /// - Parameters:
+    ///   - feedItem: `RSSFeedItem` instance
+    ///   - itemTTSType: `RSSFeedItemTTSType` type
+    /// - Returns: Void
     func fetchTTSFile(_ feedItem: RSSFeedItem, itemTTSType: RSSFeedItemTTSType) -> Void {
 
         self.feedItem = feedItem
@@ -212,6 +225,9 @@ final class SpeechController: NSObject {
             .store(in: &self.subscriptions)
     }
     
+    /// Fetches the remote sounds file
+    /// - Parameter remoteURL: `URL` of file
+    /// - Returns: `AnyPublisher<Data, Error>`
     private func fetchSoundFile(_ remoteURL: URL) -> AnyPublisher<Data, Error> {
 
         return URLSession.shared.dataTaskPublisher(for: remoteURL)
@@ -318,7 +334,7 @@ extension SpeechController: TextToSpeechDelegate {
     /// - Parameter url: `URL` to the synth'd text to speech
     func success(url: URL) {
 
-        /// Save the local URL
+        /// Fetch, save and publish the saved item / url
         
         self.fetchSoundFile(url)
             .sink(receiveCompletion: {completion in
@@ -331,7 +347,11 @@ extension SpeechController: TextToSpeechDelegate {
             }
             
         }, receiveValue: {data in
-                        
+
+            /// If there is a current item and ttstype then save the mp3 locally
+            /// Based upon the type set the `cachedHeadlineLink` or
+            /// `cachedDescriptionLink` property
+
             if var currentItem: RSSFeedItem = self.feedItem,
                 let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
                 
