@@ -7,6 +7,10 @@
 //
 
 import Foundation
+import Combine
+
+private let TTSSpeechQueueName: String = "com.spokestack.ttsspeech.queue"
+private let apiQueue = DispatchQueue(label: TTSSpeechQueueName, qos: .userInitiated, attributes: .concurrent)
 
 @objc public enum TTSInputFormat: Int {
     case text
@@ -19,6 +23,7 @@ import Foundation
     
     weak public var delegate: TextToSpeechDelegate?
     private var configuration: SpeechConfiguration
+    private let decoder = JSONDecoder()
     
     // MARK: Initializers
     
@@ -32,6 +37,34 @@ import Foundation
     }
     
     // MARK: Public Functions
+    
+    @available(iOS 13.0, *)
+    public func synthesizePublisher(_ input: TextToSpeechInput) -> AnyPublisher<URL, Error> {
+        var request = URLRequest(url: URL(string: "https://core.pylon.com/speech/v1/tts/synthesize")!)
+        request.addValue(self.configuration.authorization, forHTTPHeaderField: "Authorization")
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        
+        let body = ["voice": input.voice,
+                    "text": input.input]
+        request.httpBody =  try? JSONSerialization.data(withJSONObject: body, options: [])
+        
+        return URLSession.shared
+            .dataTaskPublisher(for: request)
+            .handleEvents(receiveSubscription: { _ in
+              print("Network request will start")
+            }, receiveOutput: { output in
+                print("Network request data received \(output.response)")
+            }, receiveCancel: {
+              print("Network request cancelled")
+            })
+            .receive(on: apiQueue)
+            .map(\.data)
+            .decode(type: TTSQueueURL.self, decoder: decoder)
+            .map{ URL(string: $0.url)! }
+            .catch{ _ in Empty<URL, Error>() }
+            .eraseToAnyPublisher()
+    }
     
     /// Synthesize speech using the provided input parameters and speech configuration. A successful synthesis will return a URL to the streaming audio container of synthesized speech to the `TextToSpeech`'s `delegate`.
     /// - Note: The URL will be invalidated within 60 seconds of generation.
@@ -59,36 +92,34 @@ import Foundation
         let task: URLSessionDataTask = session.dataTask(with: request) { (data, response, error) -> Void in
             Trace.trace(Trace.Level.DEBUG, configLevel: self.configuration.tracing, message: "task callback \(String(describing: response)) \(String(describing: String(data: data ?? Data(), encoding: String.Encoding.utf8)))) \(String(describing: error))", delegate: self.delegate, caller: self)
 
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.delegate?.failure(error: error)
-                } else {
-                    // unwrap the matryoshka doll that is the response body, responding with a failure if any layer is awry
-                    guard let data = data else {
-                        self.delegate?.failure(error: TextToSpeechErrors.deserialization("response body had no data"))
-                        return
-                    }
-                    guard let dataObject = try? JSONSerialization.jsonObject(with: data, options: []) else {
-                        self.delegate?.failure(error: TextToSpeechErrors.deserialization("could not deserialize response body"))
-                        return
-                    }
-                    guard let body = dataObject as? [String: String] else {
-                        self.delegate?.failure(error: TextToSpeechErrors.deserialization("deserialized response body was not a dictionary of strings"))
-                        return
-                    }
-                    guard let urlString = body["url"] else {
-                        self.delegate?.failure(error: TextToSpeechErrors.deserialization("deserialize response body dictionary did not contain the expected key"))
-                        return
-                    }
-                    guard let url = URL(string: urlString) else {
-                        self.delegate?.failure(error: TextToSpeechErrors.deserialization("could not generate a URL from the deserialize response body dictionary url key"))
-                        return
-                    }
-                    // we have finally arrived at the single key-value pair in the response body
-                    Trace.trace(Trace.Level.DEBUG, configLevel: self.configuration.tracing, message: "response body url \(url)", delegate: self.delegate, caller: self)
-                    
-                    self.delegate?.success(url: url)
+            if let error = error {
+                self.delegate?.failure(error: error)
+            } else {
+                // unwrap the matryoshka doll that is the response body, responding with a failure if any layer is awry
+                guard let data = data else {
+                    self.delegate?.failure(error: TextToSpeechErrors.deserialization("response body had no data"))
+                    return
                 }
+                guard let dataObject = try? JSONSerialization.jsonObject(with: data, options: []) else {
+                    self.delegate?.failure(error: TextToSpeechErrors.deserialization("could not deserialize response body"))
+                    return
+                }
+                guard let body = dataObject as? [String: String] else {
+                    self.delegate?.failure(error: TextToSpeechErrors.deserialization("deserialized response body was not a dictionary of strings"))
+                    return
+                }
+                guard let urlString = body["url"] else {
+                    self.delegate?.failure(error: TextToSpeechErrors.deserialization("deserialize response body dictionary did not contain the expected key"))
+                    return
+                }
+                guard let url = URL(string: urlString) else {
+                    self.delegate?.failure(error: TextToSpeechErrors.deserialization("could not generate a URL from the deserialize response body dictionary url key"))
+                    return
+                }
+                // we have finally arrived at the single key-value pair in the response body
+                Trace.trace(Trace.Level.PERF, configLevel: self.configuration.tracing, message: "response body url \(url)", delegate: self.delegate, caller: self)
+                
+                self.delegate?.success(url: url)
             }
         }
         task.resume()

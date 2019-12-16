@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import AVFoundation
 import UIKit
+import Spokestack
 
 private let workItemQueue: DispatchQueue = DispatchQueue(label: "com.spokestack.workitem.queue")
 
@@ -138,7 +139,30 @@ class RSSViewModel: ObservableObject {
         
         rssController.parseFeed({[unowned self] feedItems in
             self.feedItems = feedItems
+//            self.queuedDescriptions()
         })
+    }
+    
+    private func queuedDescriptions() -> Void {
+        
+        let ttsInputs: Array<TextToSpeechInput> = self.feedItems.map{ TextToSpeechInput($0.description) }
+        print("ttsInputs \(ttsInputs)")
+        self.speechController
+            .queuedController
+            .synthesize(ttsInputs)
+            .receive(on: RunLoop.main)
+            .handleEvents(receiveSubscription: { _ in
+              print("Network request will start")
+            }, receiveOutput: { _ in
+              print("Network request data received")
+            }, receiveCancel: {
+              print("Network request cancelled")
+            })
+            .sink(receiveCompletion: { print($0) },
+                  receiveValue: { value in
+                    print("what is the final value queuedDescriptions \(value)")
+            })
+            .store(in: &self.subscriptions)
     }
     
     /// Sets up subscriber to handle received cached item events from the
@@ -157,7 +181,16 @@ class RSSViewModel: ObservableObject {
         })
         .print("fetch publisher")
         .receive(on: RunLoop.main)
-        .sink(receiveValue: {[unowned self] feedItem in
+        .sink(receiveCompletion: {completion in
+
+            switch completion {
+                case .finished:
+                    break
+                case .failure(let anError):
+                    print("received error: ", anError)
+            }
+            
+        },receiveValue: {[unowned self] feedItem in
             
             /// First check to see if the headlines have finished processing
             /// if they aren't then process the next headline

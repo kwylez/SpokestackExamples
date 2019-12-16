@@ -11,6 +11,10 @@ import Spokestack
 import Combine
 import AVFoundation
 
+enum SpeechControllerErrors: Error {
+    case failedToCache
+}
+
 /// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
@@ -27,6 +31,8 @@ final class SpeechController: NSObject {
     
     /// Subject that publishes when a synthesized item is finished and sends the remote URL
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
+    
+    let queuedController: TextToSpeechQueue = TextToSpeechQueue()
     
     // MARK: Private (properties)
     
@@ -136,7 +142,41 @@ final class SpeechController: NSObject {
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
-        self.tts?.synthesize(input)
+        self.tts?.synthesizePublisher(input)
+        .flatMap{url in
+            return self.fetchSoundFile(url)
+        }
+        .tryMap{data -> URL in
+            return try self.processMP3(data)
+        }.sink(receiveCompletion: {completion in
+            print(completion)
+        }, receiveValue: {fileURL in
+            
+            /// If there is a current item and ttstype then save the mp3 locally
+            /// Based upon the type set the `cachedHeadlineLink` or
+            /// `cachedDescriptionLink` property
+
+            if var currentItem: RSSFeedItem = self.feedItem,
+                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
+
+                if itemTTSType == .headline {
+
+                    currentItem.cachedHeadlineLink = fileURL
+
+                } else {
+
+                    currentItem.cachedDescriptionLink = fileURL
+                }
+
+                self.synthesizeFeedItemHasFinished.send(currentItem)
+                self.feedItem = nil
+
+            } else {
+
+                self.synthesizeHasFinished.send(fileURL)
+            }
+        })
+        .store(in: &self.subscriptions)
     }
     
     /// Plays `AVPlayerItem` instance for the given url
@@ -234,6 +274,24 @@ final class SpeechController: NSObject {
         .mapError { $0 as Error }
         .map { $0.data }
         .eraseToAnyPublisher()
+    }
+    
+    private func processMP3(_ data: Data) throws -> URL {
+        
+        let filename: String = UUID().uuidString + ".mp3"
+        let documentDirectory: URL = FileManager.spk_documentsDir!
+        let fileURL: URL = documentDirectory.appendingPathComponent(filename)
+
+        do {
+            
+            try data.write(to: fileURL)
+            
+        } catch {
+            
+            throw SpeechControllerErrors.failedToCache
+        }
+        
+        return fileURL
     }
 }
 

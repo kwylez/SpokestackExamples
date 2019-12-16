@@ -12,7 +12,7 @@ struct App {
 
     /// Message that is read when the app starts up
     
-    static let welcomeMessage: String = "Welcome to the latest TechCrunch Headlines."
+    static let welcomeMessage: String = "Welcome to the latest CNET Headlines."
     
     /// Time delay (in seconds) between reading each headline
     
@@ -30,12 +30,12 @@ struct App {
         
         /// Text for navigation bar
         
-        static let heading: String = "TechCrunch"
+        static let heading: String = "CNET"
         
         /// RSS Feed
         /// Atom, JSON and RSS are supported
         
-        static let feedURL: String = "https://feeds.feedburner.com/TechCrunch/"
+        static let feedURL: String = "https://www.cnet.com/rss/reviews/"
         
         /// The number of articles to display and read
 

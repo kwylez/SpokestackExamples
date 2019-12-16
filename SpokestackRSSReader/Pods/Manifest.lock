@@ -1,7 +1,7 @@
 PODS:
   - FeedKit (9.0.0)
   - filter_audio (0.4.3)
-  - Spokestack-iOS (5.2.1):
+  - Spokestack-iOS (5.3.2):
     - filter_audio (~> 0.4.3)
     - TensorFlowLiteSwift (~> 1.14.0)
   - TensorFlowLiteC (1.14.0)
@@ -10,23 +10,32 @@ PODS:
 
 DEPENDENCIES:
   - FeedKit (~> 9.0)
-  - Spokestack-iOS
+  - Spokestack-iOS (from `https://github.com/kwylez/spokestack-ios.git`, branch `feature/callbacks`)
 
 SPEC REPOS:
   trunk:
     - FeedKit
     - filter_audio
-    - Spokestack-iOS
     - TensorFlowLiteC
     - TensorFlowLiteSwift
+
+EXTERNAL SOURCES:
+  Spokestack-iOS:
+    :branch: feature/callbacks
+    :git: https://github.com/kwylez/spokestack-ios.git
+
+CHECKOUT OPTIONS:
+  Spokestack-iOS:
+    :commit: a1284fb76411e6144ed1ce9ab7a968e4f31ca724
+    :git: https://github.com/kwylez/spokestack-ios.git
 
 SPEC CHECKSUMS:
   FeedKit: 9ffa2434af293df73ac069129900498b3f89cb2e
   filter_audio: 93822826dcc07a70f41a5a4b103cae97c9efde83
-  Spokestack-iOS: 730f08dc7b6503ff964233e7d2df2046c0598ac4
+  Spokestack-iOS: 0c8217dc037763222f0586e4d3d4ec617306e2a6
   TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
   TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
 
-PODFILE CHECKSUM: df80a3d78e086e641792eb01b58230c4a91371e4
+PODFILE CHECKSUM: 8048289661a529012d3698cf769c39f32999c57e
 
 COCOAPODS: 1.8.4
