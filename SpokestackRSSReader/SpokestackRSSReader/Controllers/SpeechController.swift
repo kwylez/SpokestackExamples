@@ -255,7 +255,7 @@ final class SpeechController: NSObject {
         
         let _ = NotificationCenter.default
             .publisher(for: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
-            .map({ $0.object as! AVPlayerItem })
+            .map{ $0.object as! AVPlayerItem }
             .sink(
                 receiveCompletion: {_ in },
                 receiveValue: { value in
@@ -296,70 +296,55 @@ final class SpeechController: NSObject {
     
     ///
     
-    func processFeedItemsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[RSSFeedItem], Never> {
+    func processFeedItemsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
         
         let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
-        let descriptionInput: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
+        /// Queued controller _shouldn't_ know anything about the list but how do i associate the two?
         let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
-        let descPublisher = self.queuedController.synthesize(descriptionInput)
 
-        return Publishers.Zip(headlinesPublisher, descPublisher)
-        .handleEvents(receiveSubscription: { _ in
-          print("processFeedItemsPublisher request will start")
-        }, receiveOutput: { _ in
-          print("processFeedItemsPublisher request data received")
-        }, receiveCancel: {
-          print("processFeedItemsPublisher request cancelled")
-        })
-        .map {
-            return self.mergeHeadlines(items, headlines: $0.0)
-        }
-        .map {feedItems in
-            return self.mergeHeadlines(feedItems, headlines: feedItems.compactMap{ URL(string: $0.description) })
-        }
-        .replaceError(with: [])
-        .eraseToAnyPublisher()
-    }
-    
-    func mergeHeadlines(_ items: Array<RSSFeedItem>, headlines: Array<URL>) -> Array<RSSFeedItem> {
-
-        var updatedItems: Array<RSSFeedItem> = []
-        
-        for (index, value) in headlines.enumerated() {
-//            var rssItem: RSSFeedItem = items[index]
-//            rssItem.cachedHeadlineLink = value
-//            updatedItems.append(rssItem)
-
-            self.fetchSoundFile(value)
-            .tryMap{data -> URL in
-                return try self.processMP3(data)
-            }
-            .map{url -> RSSFeedItem in
-
-                var rssItem: RSSFeedItem = items[index]
-                rssItem.cachedHeadlineLink = url
-
-                return rssItem
-            }.sink(receiveCompletion: {completion in }, receiveValue: {item in
-
-                updatedItems.append(item)
+        return headlinesPublisher
+            .handleEvents(receiveSubscription: { _ in
+              print("processFeedItemsPublisher request will start")
+            }, receiveOutput: { _ in
+              print("processFeedItemsPublisher request data received")
+            }, receiveCancel: {
+              print("processFeedItemsPublisher request cancelled")
             })
-            .store(in: &self.subscriptions)
-        }
-        print("what are the updated items \(updatedItems)")
-        return updatedItems
+            .flatMap{urls -> AnyPublisher<[URL], Error> in
+                let localURLs = urls.map{ self.processAudioURL($0) }
+                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
     }
     
-    func handleHeadlines(_ items: Array<RSSFeedItem>) -> AnyPublisher<[RSSFeedItem], Never> {
+    func processFeedItemsDescriptionsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
         
-        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
+        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
+        /// Queued controller _shouldn't_ know anything about the list but how do i associate the two?
         let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
-        var updatedItems: Array<RSSFeedItem> = []
+
+        return headlinesPublisher
+            .handleEvents(receiveSubscription: { _ in
+              print("processFeedItemsPublisher request will start")
+            }, receiveOutput: { _ in
+              print("processFeedItemsPublisher request data received")
+            }, receiveCancel: {
+              print("processFeedItemsPublisher request cancelled")
+            })
+            .flatMap{urls -> AnyPublisher<[URL], Error> in
+                let localURLs = urls.map{ self.processAudioURL($0) }
+                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+
+    private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {
         
-        items.publisher
-            .map{feedItem -> }
-        
-        return Empty().eraseToAnyPublisher()
+        return self.fetchSoundFile(url)
+        .tryMap{data -> URL in
+            return try self.processMP3(data)
+        }
+        .eraseToAnyPublisher()
     }
 }
 
