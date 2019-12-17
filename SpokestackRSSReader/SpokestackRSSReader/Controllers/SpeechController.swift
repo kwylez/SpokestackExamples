@@ -293,6 +293,74 @@ final class SpeechController: NSObject {
         
         return fileURL
     }
+    
+    ///
+    
+    func processFeedItemsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[RSSFeedItem], Never> {
+        
+        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
+        let descriptionInput: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
+        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
+        let descPublisher = self.queuedController.synthesize(descriptionInput)
+
+        return Publishers.Zip(headlinesPublisher, descPublisher)
+        .handleEvents(receiveSubscription: { _ in
+          print("processFeedItemsPublisher request will start")
+        }, receiveOutput: { _ in
+          print("processFeedItemsPublisher request data received")
+        }, receiveCancel: {
+          print("processFeedItemsPublisher request cancelled")
+        })
+        .map {
+            return self.mergeHeadlines(items, headlines: $0.0)
+        }
+        .map {feedItems in
+            return self.mergeHeadlines(feedItems, headlines: feedItems.compactMap{ URL(string: $0.description) })
+        }
+        .replaceError(with: [])
+        .eraseToAnyPublisher()
+    }
+    
+    func mergeHeadlines(_ items: Array<RSSFeedItem>, headlines: Array<URL>) -> Array<RSSFeedItem> {
+
+        var updatedItems: Array<RSSFeedItem> = []
+        
+        for (index, value) in headlines.enumerated() {
+//            var rssItem: RSSFeedItem = items[index]
+//            rssItem.cachedHeadlineLink = value
+//            updatedItems.append(rssItem)
+
+            self.fetchSoundFile(value)
+            .tryMap{data -> URL in
+                return try self.processMP3(data)
+            }
+            .map{url -> RSSFeedItem in
+
+                var rssItem: RSSFeedItem = items[index]
+                rssItem.cachedHeadlineLink = url
+
+                return rssItem
+            }.sink(receiveCompletion: {completion in }, receiveValue: {item in
+
+                updatedItems.append(item)
+            })
+            .store(in: &self.subscriptions)
+        }
+        print("what are the updated items \(updatedItems)")
+        return updatedItems
+    }
+    
+    func handleHeadlines(_ items: Array<RSSFeedItem>) -> AnyPublisher<[RSSFeedItem], Never> {
+        
+        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
+        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
+        var updatedItems: Array<RSSFeedItem> = []
+        
+        items.publisher
+            .map{feedItem -> }
+        
+        return Empty().eraseToAnyPublisher()
+    }
 }
 
 extension SpeechController: AVSpeechSynthesizerDelegate {
