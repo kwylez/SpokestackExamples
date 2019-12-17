@@ -155,30 +155,31 @@ class RSSViewModel: ObservableObject {
             }, receiveCancel: {
               print("Network request cancelled")
             })
-            .sink(receiveCompletion: { print($0) },
+            .sink(receiveCompletion: {
+                print("processFeedItemsPublisher \($0)")
+            },
                   receiveValue: { value in
                     print("what is the final value queuedDescriptions \(value)")
             })
             .store(in: &self.subscriptions)
         
-//        let ttsInputs: Array<TextToSpeechInput> = self.feedItems.map{ TextToSpeechInput($0.description) }
-//        print("ttsInputs \(ttsInputs)")
-//        self.speechController
-//            .queuedController
-//            .synthesize(ttsInputs)
-//            .receive(on: RunLoop.main)
-//            .handleEvents(receiveSubscription: { _ in
-//              print("Network request will start")
-//            }, receiveOutput: { _ in
-//              print("Network request data received")
-//            }, receiveCancel: {
-//              print("Network request cancelled")
-//            })
-//            .sink(receiveCompletion: { print($0) },
-//                  receiveValue: { value in
-//                    print("what is the final value queuedDescriptions \(value)")
-//            })
-//            .store(in: &self.subscriptions)
+        self.speechController
+            .processFeedItemsDescriptionsPublisher(self.feedItems)
+            .receive(on: RunLoop.main)
+            .handleEvents(receiveSubscription: { _ in
+              print("Network request will start processFeedItemsDescriptionsPublisher")
+            }, receiveOutput: { _ in
+              print("Network request data received processFeedItemsDescriptionsPublisher")
+            }, receiveCancel: {
+              print("Network request cancelled processFeedItemsDescriptionsPublisher")
+            })
+            .sink(receiveCompletion: {
+                print("processFeedItemsDescriptionsPublisher \($0)")
+            },
+                  receiveValue: { value in
+                    print("what is the final value  processFeedItemsDescriptionsPublisher \(value)")
+            })
+            .store(in: &self.subscriptions)
     }
     
     /// Sets up subscriber to handle received cached item events from the
