@@ -151,12 +151,7 @@ final class SpeechController: NSObject {
         let input = TextToSpeechInput(text)
         
         self.tts?.synthesizePublisher(input)
-        .flatMap{url in
-            return self.processAudioURL(url)
-        }
-        .sink(receiveCompletion: {completion in
-            print(completion)
-        }, receiveValue: {fileURL in
+        .sink(receiveCompletion: {_ in }, receiveValue: {fileURL in
             self.synthesizeHasFinished.send(fileURL)
         })
         .store(in: &self.subscriptions)
@@ -171,19 +166,6 @@ final class SpeechController: NSObject {
         self.playItem(playerItem)
     }
     
-    func processFeedItemsHeadlinesPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
-        
-        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
-        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
-
-        return headlinesPublisher
-            .flatMap{urls -> AnyPublisher<[URL], Error> in
-                let localURLs = urls.map{ self.processAudioURL($0) }
-                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
-    }
-    
     func processFeedItemsDescriptionsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
         
         let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
@@ -191,10 +173,25 @@ final class SpeechController: NSObject {
 
         return headlinesPublisher
             .flatMap{urls -> AnyPublisher<[URL], Error> in
-                let localURLs = urls.map{ self.processAudioURL($0) }
-                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
+                return self.mergedURLs(urls).scan([]) { urls, input -> [URL] in
+                    return urls + [input]
+                }.eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
+    }
+    
+    private func mergedURLs(_ inputs: Array<URL>) -> AnyPublisher<URL, Error> {
+        
+        precondition(!inputs.isEmpty)
+        
+        let initialPublisher = self.processAudioURL(inputs[0])
+        let remainder = Array(inputs.dropFirst())
+        
+        return remainder.reduce(initialPublisher) { combined, url in
+            return combined
+                .merge(with: processAudioURL(url))
+                .eraseToAnyPublisher()
+        }
     }
     
     // MARK: Private (methods)
