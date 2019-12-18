@@ -71,7 +71,7 @@ struct ContentView: View {
             .sheet(isPresented: $showModal, content: {
                 SafariView(url: self.feedItemURL)
             })
-                .navigationBarTitle("CNET", displayMode: .inline)
+            .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
         }
     }
     
