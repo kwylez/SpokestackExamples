@@ -56,11 +56,13 @@ class RSSViewModel: ObservableObject {
     /// the `feedItems` property is not empty then call `processHeadlines`
     private var shouldAnnounceWelcome: Bool = true
     
+    private var shouldAnnounceFinishMessage: Bool {
+        self.queuedItems.isEmpty && !self.isFinished
+    }
+    
     /// Array of `RSSFeedItem`'s. Once an an item has finished playing it is removed from
     /// the list.
     private var queuedItems: Array<RSSFeedItem> = []
-    
-    private var processedHeadlines: Array<URL> = []
     
     private var processedDescriptions: Array<URL> = []
     
@@ -112,41 +114,17 @@ class RSSViewModel: ObservableObject {
         
         let feedURL: URL = URL(string: App.Feed.feedURL)!
         let rssController: RSSController = RSSController(feedURL)
-
-//        self.cacheItems()
-//        self.processHeadlines()
-//        self.speechController.respond(App.welcomeMessage)
+        
+        self.setupSynthesizedHeadlinesSubscriber()
 
         rssController.parseFeed({[unowned self] feedItems in
             
-            self.feedItems = feedItems
             self.speechController.respond(App.welcomeMessage)
-            self.processFeedItems()
+            self.feedItems = feedItems
         })
     }
     
     private func processFeedItems() -> Void {
-        
-        self.speechController
-            .processFeedItemsHeadlinesPublisher(self.feedItems)
-            .receive(on: RunLoop.main)
-            .sink(receiveCompletion: {[unowned self] completion in
-                
-                print("processFeedItemsPublisher \(completion)")
-                switch completion {
-                    
-                case .finished:
-                    
-                    self.finishProcessHeadlineLinks()
-                    break
-                default: break
-                }
-            },
-            receiveValue: { urls in
-
-                self.processedHeadlines = urls
-            })
-            .store(in: &self.subscriptions)
         
            self.speechController
                 .processFeedItemsDescriptionsPublisher(self.feedItems)
@@ -179,23 +157,7 @@ class RSSViewModel: ObservableObject {
             self.feedItems[index] = item
         }
 
-        self.processSynthesizedHeadlines()
         self.startPlayback()
-        
-        print("finishProcessDescriptionLinks \(self.feedItems)")
-    }
-    
-    private func finishProcessHeadlineLinks() -> Void {
-
-        for (index, url) in self.processedHeadlines.enumerated() {
-            
-            var item: RSSFeedItem = self.feedItems[index]
-            item.cachedHeadlineLink = url
-            
-            self.feedItems[index] = item
-        }
-        
-        print("finishProcessHeadlineLinks \(self.feedItems)")
     }
     
     /// Starts playback of the `feedItems`
@@ -204,14 +166,13 @@ class RSSViewModel: ObservableObject {
         
         self.queuedItems = self.feedItems
         
-        if self.feedItems.count == self.queuedItems.count {
-
-            if let item: RSSFeedItem = self.queuedItems.first,
-                let headlineURL: URL = item.cachedHeadlineLink {
+        if self.queuedItems.count == self.feedItems.count {
+        
+            if let item: RSSFeedItem = self.queuedItems.first {
 
                 self.queuedItems.remove(at: 0)
                 self.currentItem = item
-                self.speechController.play(headlineURL)
+                self.speechController.respond(item.title)
             }
         }
     }
@@ -219,87 +180,83 @@ class RSSViewModel: ObservableObject {
     /// Processes each headline after it has finished playing
     /// It is called after the `shouldAnnounceWelcome` has been set to false
     /// - Returns: Void
-    private func processSynthesizedHeadlines() -> Void {
+    private func setupSynthesizedHeadlinesSubscriber() -> Void {
 
         UIApplication.shared.isIdleTimerDisabled = true
 
-        self.speechController.itemFinishedPublisher
-            .sink(receiveCompletion: {_ in }, receiveValue: {value in
+        self.speechController
+            .itemFinishedPublisher
+            .sink(receiveValue: {value in
 
             self.processingCurrentItemDescription = false
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
             /// and the queued items are the same
 
-            if !self.queuedItems.isEmpty {
+            if self.processedDescriptions.isEmpty {
                 
-                self.processNextItem()
+                self.processFeedItems()
+                
+            } else if !self.queuedItems.isEmpty {
 
-//                /// The work item is what will  handle activating the pipleline's ASR
-//                /// if after the `App.actionDelay` value and it hasn't been activated
-//                /// then the next item will be processed
-//
-//                self.workerItem = DispatchWorkItem { [weak self] in
-//
-//                    guard let strongSelf = self else {
-//                        return
-//                    }
-//
-//                    if !strongSelf.workerItem.isCancelled {
-//                        strongSelf.speechController.activatePipelineASR()
-//                    } else {
-//                        strongSelf.speechController.stop()
-//                    }
-//
-//                    self?.workerItem = nil
-//                }
-//
-//                /// Execute the `workerItem`
-//
-//                workItemQueue.async(execute: self.workerItem)
-//                workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
-//
-//                    DispatchQueue.main.async {
-//                        self?.workerItem?.cancel()
-//                        self?.processNextItem()
-//                    }
-//                }
+                /// The work item is what will  handle activating the pipleline's ASR
+                /// if after the `App.actionDelay` value and it hasn't been activated
+                /// then the next item will be processed
 
-            } else {
-             
-                /// If the `queuedItems` is finished, but the `App.finishedMessage`
-                /// hasn't been processed the turn on screen dimming (`UIApplication.shared.isIdleTimerDisabled`)
-                /// deactivate speech and have the `speechController`
-                /// respond to the `App.finishedMessage`
+                self.workerItem = DispatchWorkItem { [weak self] in
 
-                if self.queuedItems.isEmpty && !self.isFinished {
-                    
-                    UIApplication.shared.isIdleTimerDisabled = false
-                    
-                    self.deactiveSpeech()
-                    self.speechController.respond(App.finishedMessage)
+                    guard let strongSelf = self else {
+                        return
+                    }
+
+                    if !strongSelf.workerItem.isCancelled {
+                        strongSelf.speechController.activatePipelineASR()
+                    } else {
+                        strongSelf.speechController.stop()
+                    }
+
+                    self?.workerItem = nil
+                }
+
+                /// Execute the `workerItem`
+
+                workItemQueue.async(execute: self.workerItem)
+                workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
+
+                    DispatchQueue.main.async {
+                        
+                        self?.speechController.activatePipelineASR()
+                        self?.workerItem?.cancel()
+                        self?.processNextItem()
+                    }
                 }
             }
         })
         .store(in: &self.subscriptions)
-
+        
         /// Subscriber that will handle when a synthesize item has finished and the `URL` has
         /// been received
-        self.speechController.synthesizeHasFinished.sink(receiveValue: {url in
-
-            self.speechController.play(url)
-            
-            if self.shouldAnnounceWelcome {
+        self.speechController.synthesizeHasFinished
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: {url in
 
                 self.speechController.play(url)
-                self.shouldAnnounceWelcome.toggle()
+                    
+                if self.shouldAnnounceWelcome {
 
-                return
-            }
+                    self.shouldAnnounceWelcome.toggle()
+                    return
 
-            if !self.isFinished {
-                self.isFinished.toggle()
-            }
+                }
+
+                if self.shouldAnnounceFinishMessage {
+                    
+                    UIApplication.shared.isIdleTimerDisabled = false
+                    
+                    self.isFinished.toggle()
+//                    self.deactiveSpeech()
+//                    self.speechController.respond(App.finishedMessage)
+                }
         })
         .store(in: &self.subscriptions)
     }
@@ -308,18 +265,16 @@ class RSSViewModel: ObservableObject {
     /// if there is one
     /// - Returns: Void
     private func processNextItem() -> Void {
-        
+
         if self.processingCurrentItemDescription {
             return
         }
 
-        if let nextItem: RSSFeedItem = self.queuedItems.first,
-            let headlineURL: URL = nextItem.cachedHeadlineLink {
+        if let nextItem: RSSFeedItem = self.queuedItems.first {
             
             self.queuedItems.remove(at: 0)
             self.currentItem = nextItem
-            self.speechController.play(headlineURL)
-
+            self.speechController.respond(nextItem.title)
         }
     }
 }
