@@ -10,7 +10,7 @@ import Foundation
 import Combine
 
 private let TTSSpeechQueueName: String = "com.spokestack.ttsspeech.queue"
-private let apiQueue = DispatchQueue(label: TTSSpeechQueueName, qos: .userInitiated, attributes: .concurrent)
+private let apiQueue = DispatchQueue(label: TTSSpeechQueueName, qos: .userInitiated, attributes: [])
 
 @objc public enum TTSInputFormat: Int {
     case text

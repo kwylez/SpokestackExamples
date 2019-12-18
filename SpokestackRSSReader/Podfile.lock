@@ -26,7 +26,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   Spokestack-iOS:
-    :commit: a1284fb76411e6144ed1ce9ab7a968e4f31ca724
+    :commit: d4b10a8c3ab77b3195dafcd2c6f854255c254cf0
     :git: https://github.com/kwylez/spokestack-ios.git
 
 SPEC CHECKSUMS:

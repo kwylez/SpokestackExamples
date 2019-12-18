@@ -15,6 +15,13 @@ enum SpeechControllerErrors: Error {
     case failedToCache
 }
 
+struct ProcessedItemTitle {
+    
+    let feedItem: RSSFeedItem
+    
+    let tts: TextToSpeechInput
+}
+
 /// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
@@ -142,39 +149,15 @@ final class SpeechController: NSObject {
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
+        
         self.tts?.synthesizePublisher(input)
         .flatMap{url in
-            return self.fetchSoundFile(url)
+            return self.processAudioURL(url)
         }
-        .tryMap{data -> URL in
-            return try self.processMP3(data)
-        }.sink(receiveCompletion: {completion in
+        .sink(receiveCompletion: {completion in
             print(completion)
         }, receiveValue: {fileURL in
-            
-            /// If there is a current item and ttstype then save the mp3 locally
-            /// Based upon the type set the `cachedHeadlineLink` or
-            /// `cachedDescriptionLink` property
-
-            if var currentItem: RSSFeedItem = self.feedItem,
-                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
-
-                if itemTTSType == .headline {
-
-                    currentItem.cachedHeadlineLink = fileURL
-
-                } else {
-
-                    currentItem.cachedDescriptionLink = fileURL
-                }
-
-                self.synthesizeFeedItemHasFinished.send(currentItem)
-                self.feedItem = nil
-
-            } else {
-
-                self.synthesizeHasFinished.send(fileURL)
-            }
+            self.synthesizeHasFinished.send(fileURL)
         })
         .store(in: &self.subscriptions)
     }
@@ -188,25 +171,30 @@ final class SpeechController: NSObject {
         self.playItem(playerItem)
     }
     
-    /// Fetches the  `URL` for either the `RSSFeedItem`'s `title` or `description` property
-    /// - Parameters:
-    ///   - feedItem: `RSSFeedItem` instance
-    ///   - itemTTSType: `RSSFeedItemTTSType` type
-    /// - Returns: Void
-    func fetchTTSFile(_ feedItem: RSSFeedItem, itemTTSType: RSSFeedItemTTSType) -> Void {
-
-        self.feedItem = feedItem
-        self.itemTTSType = itemTTSType
+    func processFeedItemsHeadlinesPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
         
-        switch itemTTSType {
-            
-        case .headline:
-            self.respond(self.feedItem!.title)
-            break
-        case .description:
-            self.respond(self.feedItem!.description)
-            break
-        }
+        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
+        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
+
+        return headlinesPublisher
+            .flatMap{urls -> AnyPublisher<[URL], Error> in
+                let localURLs = urls.map{ self.processAudioURL($0) }
+                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    func processFeedItemsDescriptionsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
+        
+        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
+        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
+
+        return headlinesPublisher
+            .flatMap{urls -> AnyPublisher<[URL], Error> in
+                let localURLs = urls.map{ self.processAudioURL($0) }
+                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
     }
     
     // MARK: Private (methods)
@@ -292,50 +280,6 @@ final class SpeechController: NSObject {
         }
         
         return fileURL
-    }
-    
-    ///
-    
-    func processFeedItemsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
-        
-        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.title) }
-        /// Queued controller _shouldn't_ know anything about the list but how do i associate the two?
-        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
-
-        return headlinesPublisher
-            .handleEvents(receiveSubscription: { _ in
-              print("processFeedItemsPublisher request will start")
-            }, receiveOutput: { _ in
-              print("processFeedItemsPublisher request data received")
-            }, receiveCancel: {
-              print("processFeedItemsPublisher request cancelled")
-            })
-            .flatMap{urls -> AnyPublisher<[URL], Error> in
-                let localURLs = urls.map{ self.processAudioURL($0) }
-                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    func processFeedItemsDescriptionsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
-        
-        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
-        /// Queued controller _shouldn't_ know anything about the list but how do i associate the two?
-        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
-
-        return headlinesPublisher
-            .handleEvents(receiveSubscription: { _ in
-              print("processFeedItemsPublisher request will start")
-            }, receiveOutput: { _ in
-              print("processFeedItemsPublisher request data received")
-            }, receiveCancel: {
-              print("processFeedItemsPublisher request cancelled")
-            })
-            .flatMap{urls -> AnyPublisher<[URL], Error> in
-                let localURLs = urls.map{ self.processAudioURL($0) }
-                return Publishers.MergeMany(localURLs).collect().eraseToAnyPublisher()
-            }
-            .eraseToAnyPublisher()
     }
 
     private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {

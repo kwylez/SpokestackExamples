@@ -12,7 +12,7 @@ struct App {
 
     /// Message that is read when the app starts up
     
-    static let welcomeMessage: String = "Welcome to the latest CNET Headlines."
+    static let welcomeMessage: String = "Welcome to the latest CNET Headlines. Please stand by for processing"
     
     /// Time delay (in seconds) between reading each headline
     

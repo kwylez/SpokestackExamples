@@ -34,30 +34,6 @@ class RSSViewModel: ObservableObject {
     
     // MARK: Private (properties)
     
-    /// Gives a count of how many headline texts that have been processed
-    private var processedHeadlineURLS: Int = 0
-    
-    /// Gives a count of how many description texts that have been processed
-    private var processedDescriptionURLS: Int = 0
-    
-    /// Computed propery that returns true if the `feedItems.count` and
-    /// `processedHeadlineURLS` are the same
-    private var hasFinishedCachingHeadlineURLS: Bool {
-        return self.feedItems.count == self.processedHeadlineURLS
-    }
-    
-    /// Computed propery that returns true if the `feedItems.count` and
-    /// `processedDescriptionURLS` are the same
-    private var hasFinishedCachingDescriptionURLS: Bool {
-        return self.feedItems.count == self.processedDescriptionURLS
-    }
-    
-    /// Computed propery that returns true if  `hasFinishedCachingHeadlineURLS` and
-    /// `hasFinishedCachingDescriptionURLS` are the same
-    private var hasFinishedCachingURLS: Bool {
-        return self.hasFinishedCachingHeadlineURLS && self.hasFinishedCachingDescriptionURLS
-    }
-    
     /// Whether or not the current item's description is being read
     private var processingCurrentItemDescription: Bool = false
     
@@ -83,6 +59,10 @@ class RSSViewModel: ObservableObject {
     /// Array of `RSSFeedItem`'s. Once an an item has finished playing it is removed from
     /// the list.
     private var queuedItems: Array<RSSFeedItem> = []
+    
+    private var processedHeadlines: Array<URL> = []
+    
+    private var processedDescriptions: Array<URL> = []
     
     // MARK: Initializers
     
@@ -136,139 +116,86 @@ class RSSViewModel: ObservableObject {
 //        self.cacheItems()
 //        self.processHeadlines()
 //        self.speechController.respond(App.welcomeMessage)
-        
+
         rssController.parseFeed({[unowned self] feedItems in
+            
             self.feedItems = feedItems
-            self.queuedDescriptions()
+            self.speechController.respond(App.welcomeMessage)
+            self.processFeedItems()
         })
     }
     
-    private func queuedDescriptions() -> Void {
+    private func processFeedItems() -> Void {
         
         self.speechController
-            .processFeedItemsPublisher(self.feedItems)
+            .processFeedItemsHeadlinesPublisher(self.feedItems)
             .receive(on: RunLoop.main)
-            .handleEvents(receiveSubscription: { _ in
-              print("Network request will start")
-            }, receiveOutput: { _ in
-              print("Network request data received")
-            }, receiveCancel: {
-              print("Network request cancelled")
-            })
-            .sink(receiveCompletion: {
-                print("processFeedItemsPublisher \($0)")
-            },
-                  receiveValue: { value in
-                    print("what is the final value queuedDescriptions \(value)")
-            })
-            .store(in: &self.subscriptions)
-        
-        self.speechController
-            .processFeedItemsDescriptionsPublisher(self.feedItems)
-            .receive(on: RunLoop.main)
-            .handleEvents(receiveSubscription: { _ in
-              print("Network request will start processFeedItemsDescriptionsPublisher")
-            }, receiveOutput: { _ in
-              print("Network request data received processFeedItemsDescriptionsPublisher")
-            }, receiveCancel: {
-              print("Network request cancelled processFeedItemsDescriptionsPublisher")
-            })
-            .sink(receiveCompletion: {
-                print("processFeedItemsDescriptionsPublisher \($0)")
-            },
-                  receiveValue: { value in
-                    print("what is the final value  processFeedItemsDescriptionsPublisher \(value)")
-            })
-            .store(in: &self.subscriptions)
-    }
-    
-    /// Sets up subscriber to handle received cached item events from the
-    /// `SpeechController.synthesizeFeedItemHasFinished`
-    /// publisher
-    /// - Returns: Void
-    private func cacheItems() -> Void {
-        
-        self.speechController.synthesizeFeedItemHasFinished
-        .handleEvents(receiveSubscription: { _ in
-          print("Network request will start")
-        }, receiveOutput: { output in
-          print("Network request data received \(output)")
-        }, receiveCancel: {
-          print("Network request cancelled")
-        })
-        .print("fetch publisher")
-        .receive(on: RunLoop.main)
-        .sink(receiveCompletion: {completion in
-
-            switch completion {
+            .sink(receiveCompletion: {[unowned self] completion in
+                
+                print("processFeedItemsPublisher \(completion)")
+                switch completion {
+                    
                 case .finished:
+                    
+                    self.finishProcessHeadlineLinks()
                     break
-                case .failure(let anError):
-                    print("received error: ", anError)
-            }
-            
-        },receiveValue: {[unowned self] feedItem in
-            
-            /// First check to see if the headlines have finished processing
-            /// if they aren't then process the next headline
-            
-            if !self.hasFinishedCachingHeadlineURLS {
-            
-                if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.id == feedItem.id }) {
-                    self.feedItems[indexOfFeedItem] = feedItem
+                default: break
                 }
+            },
+            receiveValue: { urls in
 
-                self.processedHeadlineURLS += 1
-                self.processNextHeadline()
+                self.processedHeadlines = urls
+            })
+            .store(in: &self.subscriptions)
+        
+           self.speechController
+                .processFeedItemsDescriptionsPublisher(self.feedItems)
+                .receive(on: RunLoop.main)
+                .sink(receiveCompletion: {[unowned self] completion in
 
-                /// Once the headline are done caching, initiate the description caching
-                
-                if self.hasFinishedCachingHeadlineURLS {
-                    self.initiateDescriptionCaching()
-                }
-                
-                return
-            }
-            
-            /// If the descriptions haven't finished caching then process the next
-            /// one. Once they are finished then start playback
-            
-            if !self.hasFinishedCachingDescriptionURLS {
+                    switch completion {
 
-                if let indexOfFeedItem: Int = self.feedItems.firstIndex(where: { $0.id == feedItem.id }) {
-                    self.feedItems[indexOfFeedItem] = feedItem
-                }
+                    case .finished:
+                        
+                        self.finishProcessDescriptionLinks()
+                        break
+                    default: break
+                    }
+                },
+                receiveValue: { urls in
 
-                self.processedDescriptionURLS += 1
-                self.processNextDescription()
-
-                if self.hasFinishedCachingURLS {
-                    self.startPlayback()
-                }
-
-                return
-            }
-        })
-        .store(in: &self.subscriptions)
+                    self.processedDescriptions = urls
+                })
+                .store(in: &self.subscriptions)
     }
     
-    /// If `processedHeadlineURLS`  is less than the number of `feedItems`
-    /// then the next headline will be processed by the `speechController` instance
-    /// - Returns: Void
-    private func processNextHeadline() -> Void {
-        
-        if self.processedHeadlineURLS < self.feedItems.count {
-            self.speechController.fetchTTSFile(self.feedItems[self.processedHeadlineURLS], itemTTSType: .headline)
+    private func finishProcessDescriptionLinks() -> Void {
+
+        for (index, url) in self.processedDescriptions.enumerated() {
+            
+            var item: RSSFeedItem = self.feedItems[index]
+            item.cachedDescriptionLink = url
+            
+            self.feedItems[index] = item
         }
+
+        self.processSynthesizedHeadlines()
+        self.startPlayback()
+        
+        print("finishProcessDescriptionLinks \(self.feedItems)")
     }
-    /// If `processedHeadlineURLS`  is less than the number of `feedItems`
-    /// then the next headline will be processed by the `speechController` instance
-    /// - Returns: Void
-    private func processNextDescription() -> Void {
-        
-        if self.processedDescriptionURLS < self.feedItems.count {
-            self.speechController.fetchTTSFile(self.feedItems[self.processedDescriptionURLS], itemTTSType: .description)
+    
+    private func finishProcessHeadlineLinks() -> Void {
+
+        for (index, url) in self.processedHeadlines.enumerated() {
+            
+            var item: RSSFeedItem = self.feedItems[index]
+            item.cachedHeadlineLink = url
+            
+            self.feedItems[index] = item
         }
+        
+        print("finishProcessHeadlineLinks \(self.feedItems)")
     }
     
     /// Starts playback of the `feedItems`
@@ -289,26 +216,10 @@ class RSSViewModel: ObservableObject {
         }
     }
     
-    /// Fetches the TTS file for the first `RSSFeedItem`'s headline
-    /// - Returns: Void
-    private func initiateHeadlineCaching() -> Void {
-
-        let firstItemIndex: Int = 0
-        self.speechController.fetchTTSFile(self.feedItems[firstItemIndex], itemTTSType: .headline)
-    }
-
-    /// Fetches the TTS file for the first `RSSFeedItem`'s description
-    /// - Returns: Void
-    private func initiateDescriptionCaching() -> Void {
-
-        let firstItemIndex: Int = 0
-        self.speechController.fetchTTSFile(self.feedItems[firstItemIndex], itemTTSType: .description)
-    }
-    
     /// Processes each headline after it has finished playing
     /// It is called after the `shouldAnnounceWelcome` has been set to false
     /// - Returns: Void
-    private func processHeadlines() -> Void {
+    private func processSynthesizedHeadlines() -> Void {
 
         UIApplication.shared.isIdleTimerDisabled = true
 
@@ -321,42 +232,38 @@ class RSSViewModel: ObservableObject {
             /// and the queued items are the same
 
             if !self.queuedItems.isEmpty {
-
-                /// The work item is what will  handle activating the pipleline's ASR
-                /// if after the `App.actionDelay` value and it hasn't been activated
-                /// then the next item will be processed
-
-                self.workerItem = DispatchWorkItem { [weak self] in
-
-                    guard let strongSelf = self else {
-                        return
-                    }
-
-                    if !strongSelf.workerItem.isCancelled {
-                        strongSelf.speechController.activatePipelineASR()
-                    } else {
-                        strongSelf.speechController.stop()
-                    }
-
-                    self?.workerItem = nil
-                }
-
-                /// Execute the `workerItem`
-
-                workItemQueue.async(execute: self.workerItem)
-                workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
-
-                    DispatchQueue.main.async {
-                        self?.workerItem?.cancel()
-                        self?.processNextItem()
-                    }
-                }
-
-            } else if !self.hasFinishedCachingHeadlineURLS {
-
-                /// Process the headline caching
                 
-                self.initiateHeadlineCaching()
+                self.processNextItem()
+
+//                /// The work item is what will  handle activating the pipleline's ASR
+//                /// if after the `App.actionDelay` value and it hasn't been activated
+//                /// then the next item will be processed
+//
+//                self.workerItem = DispatchWorkItem { [weak self] in
+//
+//                    guard let strongSelf = self else {
+//                        return
+//                    }
+//
+//                    if !strongSelf.workerItem.isCancelled {
+//                        strongSelf.speechController.activatePipelineASR()
+//                    } else {
+//                        strongSelf.speechController.stop()
+//                    }
+//
+//                    self?.workerItem = nil
+//                }
+//
+//                /// Execute the `workerItem`
+//
+//                workItemQueue.async(execute: self.workerItem)
+//                workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
+//
+//                    DispatchQueue.main.async {
+//                        self?.workerItem?.cancel()
+//                        self?.processNextItem()
+//                    }
+//                }
 
             } else {
              
