@@ -230,6 +230,16 @@ class RSSViewModel: ObservableObject {
                         self?.processNextItem()
                     }
                 }
+            } else {
+
+                if self.shouldAnnounceFinishMessage {
+
+                     UIApplication.shared.isIdleTimerDisabled = false
+                     
+                     self.isFinished.toggle()
+                     self.deactiveSpeech()
+                     self.speechController.respond(App.finishedMessage)
+                 }
             }
         })
         .store(in: &self.subscriptions)
@@ -246,16 +256,6 @@ class RSSViewModel: ObservableObject {
 
                     self.shouldAnnounceWelcome.toggle()
                     return
-
-                }
-
-                if self.shouldAnnounceFinishMessage {
-                    
-                    UIApplication.shared.isIdleTimerDisabled = false
-                    
-                    self.isFinished.toggle()
-//                    self.deactiveSpeech()
-//                    self.speechController.respond(App.finishedMessage)
                 }
         })
         .store(in: &self.subscriptions)
@@ -276,6 +276,8 @@ class RSSViewModel: ObservableObject {
             self.currentItem = nextItem
             self.speechController.respond(nextItem.title)
         }
+        
+        print("next item \(self.queuedItems)")
     }
 }
 
