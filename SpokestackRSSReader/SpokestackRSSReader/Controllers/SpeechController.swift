@@ -15,13 +15,6 @@ enum SpeechControllerErrors: Error {
     case failedToCache
 }
 
-struct ProcessedItemTitle {
-    
-    let feedItem: RSSFeedItem
-    
-    let tts: TextToSpeechInput
-}
-
 /// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
@@ -46,12 +39,6 @@ final class SpeechController: NSObject {
     /// Holds a references to any of the publishers to be cancelled during
     /// deallocation
     private var subscriptions = Set<AnyCancellable>()
-    
-    /// `AVSpeechSynthesizer` instance for handling speech to text
-    /// After a headlie is read the ASR is activated and processed by the
-    /// synthesizer. If speech contains `App.actionPhrase` then the
-    /// description for the current item is "read"
-    private let avSpeechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
     
     /// `AVPlayer` instance that will handle playback for the mp3
     private var player: AVPlayer = AVPlayer()
@@ -103,17 +90,13 @@ final class SpeechController: NSObject {
     
     /// Sets pipeline and avSpeechSynthesizer  delegate to nil
     deinit {
-        
         pipeline.speechDelegate = nil
-        avSpeechSynthesizer.delegate = nil
     }
     
     /// Initializes `tts` by setting this class as it's delegate and default `SpeechConfiguration`
     override init() {
         
         super.init()
-        
-        avSpeechSynthesizer.delegate = self
         tts = TextToSpeech(self, configuration: SpeechConfiguration())
     }
     
@@ -289,33 +272,6 @@ final class SpeechController: NSObject {
     }
 }
 
-extension SpeechController: AVSpeechSynthesizerDelegate {
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        print("sp did start \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        print("sp did finish \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-        print("sp did pause \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-        print("sp did continue \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        print("sp did cancel \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        print("sp willSpeakRangeOfSpeechString \(utterance)")
-    }
-}
-
 extension SpeechController: SpeechEventListener {
     
     /// `SpeechPipeline` as been activated
@@ -386,52 +342,52 @@ extension SpeechController: TextToSpeechDelegate {
     /// - Parameter url: `URL` to the synth'd text to speech
     func success(url: URL) {
 
-        /// Fetch, save and publish the saved item / url
-        
-        self.fetchSoundFile(url)
-            .sink(receiveCompletion: {completion in
-
-            switch completion {
-                case .finished:
-                    break
-                case .failure(let anError):
-                    print("received error: ", anError)
-            }
-            
-        }, receiveValue: {data in
-
-            /// If there is a current item and ttstype then save the mp3 locally
-            /// Based upon the type set the `cachedHeadlineLink` or
-            /// `cachedDescriptionLink` property
-
-            if var currentItem: RSSFeedItem = self.feedItem,
-                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
-                
-                let filename: String = UUID().uuidString + ".mp3"
-
-                let documentDirectory: URL = FileManager.spk_documentsDir!
-                let fileURL: URL = documentDirectory.appendingPathComponent(filename)
-                
-                try? data.write(to: fileURL)
-                
-                if itemTTSType == .headline {
-                    
-                    currentItem.cachedHeadlineLink = fileURL
-                    
-                } else {
-                    
-                    currentItem.cachedDescriptionLink = fileURL
-                }
-
-                self.synthesizeFeedItemHasFinished.send(currentItem)
-                self.feedItem = nil
-
-            } else {
-
-                self.synthesizeHasFinished.send(url)
-            }
-        })
-        .store(in: &self.subscriptions)
+//        /// Fetch, save and publish the saved item / url
+//
+//        self.fetchSoundFile(url)
+//            .sink(receiveCompletion: {completion in
+//
+//            switch completion {
+//                case .finished:
+//                    break
+//                case .failure(let anError):
+//                    print("received error: ", anError)
+//            }
+//
+//        }, receiveValue: {data in
+//
+//            /// If there is a current item and ttstype then save the mp3 locally
+//            /// Based upon the type set the `cachedHeadlineLink` or
+//            /// `cachedDescriptionLink` property
+//
+//            if var currentItem: RSSFeedItem = self.feedItem,
+//                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
+//
+//                let filename: String = UUID().uuidString + ".mp3"
+//
+//                let documentDirectory: URL = FileManager.spk_documentsDir!
+//                let fileURL: URL = documentDirectory.appendingPathComponent(filename)
+//
+//                try? data.write(to: fileURL)
+//
+//                if itemTTSType == .headline {
+//
+//                    currentItem.cachedHeadlineLink = fileURL
+//
+//                } else {
+//
+//                    currentItem.cachedDescriptionLink = fileURL
+//                }
+//
+//                self.synthesizeFeedItemHasFinished.send(currentItem)
+//                self.feedItem = nil
+//
+//            } else {
+//
+//                self.synthesizeHasFinished.send(url)
+//            }
+//        })
+//        .store(in: &self.subscriptions)
     }
     
     func failure(error: Error) {
