@@ -21,9 +21,13 @@ public struct TTSQueueURL: Codable {
 @available(iOS 13.0, *)
 @objc public class TextToSpeechQueue: NSObject {
     
+    // MARK: Properties
+    
     private var configuration: SpeechConfiguration
     
     private let decoder = JSONDecoder()
+    
+    // MARK: Initializers
     
     @objc public init(_ configuration: SpeechConfiguration) {
         self.configuration = configuration
@@ -34,6 +38,8 @@ public struct TTSQueueURL: Codable {
         self.configuration = SpeechConfiguration()
         super.init()
     }
+    
+    // MARK: Public methods
     
     public func synthesize(_ inputs: Array<TextToSpeechInput>) -> AnyPublisher<[URL], Error> {
 
@@ -70,9 +76,9 @@ public struct TTSQueueURL: Codable {
             .eraseToAnyPublisher()
     }
     
-    ///
+    // MARK: Private methods)
     
-    func mergedInputs(_ inputs: Array<TextToSpeechInput>) -> AnyPublisher<URL, Error> {
+    private func mergedInputs(_ inputs: Array<TextToSpeechInput>) -> AnyPublisher<URL, Error> {
         
         precondition(!inputs.isEmpty)
         
