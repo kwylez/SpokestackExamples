@@ -6,6 +6,6 @@ target 'SpokestackRSSReader' do
   use_frameworks!
 
   # Pods for SpokestackRSSReader
-	pod 'Spokestack-iOS', :git => 'https://github.com/kwylez/spokestack-ios.git', :branch => 'feature/callbacks'
+	pod 'Spokestack-iOS', :git => 'https://github.com/kwylez/spokestack-ios.git', :branch => 'master-feature-callback-merge'
 	pod 'FeedKit', '~> 9.0'
 end
