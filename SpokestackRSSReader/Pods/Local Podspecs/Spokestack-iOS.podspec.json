@@ -1,7 +1,7 @@
 {
   "name": "Spokestack-iOS",
   "module_name": "Spokestack",
-  "version": "5.3.2",
+  "version": "6.0.0",
   "license": {
     "type": "Apache",
     "file": "LICENSE"
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/spokestack/spokestack-ios.git",
-    "tag": "5.3.2"
+    "tag": "6.0.0"
   },
   "platforms": {
     "ios": "11.0"

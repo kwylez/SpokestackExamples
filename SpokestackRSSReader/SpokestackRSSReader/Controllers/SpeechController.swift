@@ -13,6 +13,7 @@ import AVFoundation
 
 enum SpeechControllerErrors: Error {
     case failedToCache
+    case invalidRemoteURL
 }
 
 /// Controller class for controlling an RSS feed
@@ -134,8 +135,16 @@ final class SpeechController: NSObject {
         let input = TextToSpeechInput(text)
         
         self.tts?.synthesizePublisher(input)
-        .sink(receiveCompletion: {_ in }, receiveValue: {fileURL in
-            self.synthesizeHasFinished.send(fileURL)
+        .tryMap {result -> URL in
+        
+            guard let url: URL = result.url else {
+                throw SpeechControllerErrors.invalidRemoteURL
+            }
+            
+            return url
+        }
+        .sink(receiveCompletion: {_ in }, receiveValue: {resultURL in
+            self.synthesizeHasFinished.send(resultURL)
         })
         .store(in: &self.subscriptions)
     }
@@ -155,6 +164,10 @@ final class SpeechController: NSObject {
         let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
 
         return headlinesPublisher
+            .tryMap{results -> [URL] in
+
+                return results.compactMap{$0.url}
+            }
             .flatMap{urls -> AnyPublisher<[URL], Error> in
                 return self.mergedURLs(urls).scan([]) { urls, input -> [URL] in
                     return urls + [input]
@@ -233,6 +246,19 @@ final class SpeechController: NSObject {
             .store(in: &self.subscriptions)
     }
     
+    
+    /// Fetches the remote sound file and save it locally
+    /// - Parameter url: Remote `URL` of file
+    /// - Returns: `AnyPublisher<URL, Error>`
+    private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {
+        
+        return self.fetchSoundFile(url)
+        .tryMap{data -> URL in
+            return try self.processMP3(data)
+        }
+        .eraseToAnyPublisher()
+    }
+    
     /// Fetches the remote sounds file
     /// - Parameter remoteURL: `URL` of file
     /// - Returns: `AnyPublisher<Data, Error>`
@@ -244,6 +270,10 @@ final class SpeechController: NSObject {
         .eraseToAnyPublisher()
     }
     
+    /// Saves the audio data locally to an mp3
+    /// - Parameter data: Audio `Data`
+    /// - Returns: `URL`
+    /// - Throws: `SpeechControllerErrors.failedToCache`
     private func processMP3(_ data: Data) throws -> URL {
         
         let filename: String = UUID().uuidString + ".mp3"
@@ -260,15 +290,6 @@ final class SpeechController: NSObject {
         }
         
         return fileURL
-    }
-
-    private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {
-        
-        return self.fetchSoundFile(url)
-        .tryMap{data -> URL in
-            return try self.processMP3(data)
-        }
-        .eraseToAnyPublisher()
     }
 }
 
@@ -337,6 +358,19 @@ extension SpeechController: PipelineDelegate {
 }
 
 extension SpeechController: TextToSpeechDelegate {
+    
+    func success(result: TextToSpeechResult) {
+        print("result \(result)")
+    }
+    
+    func didBeginSpeaking() {
+        print("didBeginSpeaking")
+    }
+    
+    func didFinishSpeaking() {
+        print("didFinishSpeaking")
+    }
+    
     
     /// The results from calling`parse`
     /// - Parameter url: `URL` to the synth'd text to speech
