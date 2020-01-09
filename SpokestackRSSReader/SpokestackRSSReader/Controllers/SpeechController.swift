@@ -165,30 +165,18 @@ final class SpeechController: NSObject {
 
         return headlinesPublisher
             .tryMap{results -> [URL] in
-
                 return results.compactMap{$0.url}
             }
-            .flatMap{urls -> AnyPublisher<[URL], Error> in
-                return self.mergedURLs(urls).scan([]) { urls, input -> [URL] in
-                    return urls + [input]
-                }.eraseToAnyPublisher()
+            .flatMap{urls in
+                return Publishers.MergeMany(
+                    urls.map(self.processAudioURL)
+                )
+                .collect()
+                .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
-    
-    private func mergedURLs(_ inputs: Array<URL>) -> AnyPublisher<URL, Error> {
-        
-        precondition(!inputs.isEmpty)
-        
-        let initialPublisher = self.processAudioURL(inputs[0])
-        let remainder = Array(inputs.dropFirst())
-        
-        return remainder.reduce(initialPublisher) { combined, url in
-            return combined
-                .merge(with: processAudioURL(url))
-                .eraseToAnyPublisher()
-        }
-    }
+
     
     // MARK: Private (methods)
     
