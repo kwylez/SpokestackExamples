@@ -10,7 +10,7 @@ PODS:
 
 DEPENDENCIES:
   - FeedKit (~> 9.0)
-  - Spokestack-iOS (from `https://github.com/kwylez/spokestack-ios.git`, branch `master-feature-callbacks-merge`)
+  - Spokestack-iOS (from `https://github.com/kwylez/spokestack-ios.git`, branch `master-feature-callbacks-merge-many`)
 
 SPEC REPOS:
   trunk:
@@ -21,12 +21,12 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   Spokestack-iOS:
-    :branch: master-feature-callbacks-merge
+    :branch: master-feature-callbacks-merge-many
     :git: https://github.com/kwylez/spokestack-ios.git
 
 CHECKOUT OPTIONS:
   Spokestack-iOS:
-    :commit: 4ae0c37cfd30bb1bd6fc66f817b3ee80fdb5e4eb
+    :commit: b0e78f3fcba63ef950d914413a8979e8d1f1ed1c
     :git: https://github.com/kwylez/spokestack-ios.git
 
 SPEC CHECKSUMS:
@@ -36,6 +36,6 @@ SPEC CHECKSUMS:
   TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
   TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
 
-PODFILE CHECKSUM: a762494570a0c9c7ac9d7c146649cbc125c0c573
+PODFILE CHECKSUM: 397d539cf89993b7884aca43d4ee73d9c165af67
 
 COCOAPODS: 1.8.4
