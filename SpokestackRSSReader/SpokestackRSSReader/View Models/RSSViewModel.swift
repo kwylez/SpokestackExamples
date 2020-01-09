@@ -276,8 +276,6 @@ class RSSViewModel: ObservableObject {
             self.currentItem = nextItem
             self.speechController.respond(nextItem.title)
         }
-        
-        print("next item \(self.queuedItems)")
     }
 }
 
