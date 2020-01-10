@@ -43,7 +43,7 @@ struct ContentView: View {
                         
                         FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
                             
-                            self.viewModel.readArticleDescription(feedItem.description)
+                            self.viewModel.readArticleDescription(feedItem)
 
                         }, seeMoreCallback: {url in
 
@@ -71,7 +71,7 @@ struct ContentView: View {
             .sheet(isPresented: $showModal, content: {
                 SafariView(url: self.feedItemURL)
             })
-            .navigationBarTitle("TechCrunch", displayMode: .inline)
+            .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
         }
     }
     

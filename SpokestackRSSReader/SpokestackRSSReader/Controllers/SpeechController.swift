@@ -11,6 +11,11 @@ import Spokestack
 import Combine
 import AVFoundation
 
+enum SpeechControllerErrors: Error {
+    case failedToCache
+    case invalidRemoteURL
+}
+
 /// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
@@ -22,17 +27,19 @@ final class SpeechController: NSObject {
     /// Subject that publishes the `AVPlayerItem` that finished playing to any subscribers
     let itemFinishedPublisher = PassthroughSubject<AVPlayerItem, Never>()
     
+    /// Subject that publishes when a feed item has been sythesized and cached
+    let synthesizeFeedItemHasFinished = PassthroughSubject<RSSFeedItem, Never>()
+    
+    /// Subject that publishes when a synthesized item is finished and sends the remote URL
+    let synthesizeHasFinished = PassthroughSubject<URL, Never>()
+    
+    let queuedController: TextToSpeechQueue = TextToSpeechQueue()
+    
     // MARK: Private (properties)
     
     /// Holds a references to any of the publishers to be cancelled during
     /// deallocation
     private var subscriptions = Set<AnyCancellable>()
-    
-    /// `AVSpeechSynthesizer` instance for handling speech to text
-    /// After a headlie is read the ASR is activated and processed by the
-    /// synthesizer. If speech contains `App.actionPhrase` then the
-    /// description for the current item is "read"
-    private let avSpeechSynthesizer: AVSpeechSynthesizer = AVSpeechSynthesizer()
     
     /// `AVPlayer` instance that will handle playback for the mp3
     private var player: AVPlayer = AVPlayer()
@@ -43,6 +50,12 @@ final class SpeechController: NSObject {
     /// Holds an array of `AVPlayerItem`'s that are waiting to be processeed
     /// Once an item has finished playing it is removed from the queue
     private var queued: Array<AVPlayerItem> = []
+    
+    /// The `RSSFeedItemTTSType` enum
+    private var itemTTSType: RSSFeedItemTTSType?
+    
+    /// The current `RSSFeedItem` instance that is being processed
+    private var feedItem: RSSFeedItem?
     
     /// Utterance that comes back from the ASR
     /// All values are lowercased
@@ -78,17 +91,13 @@ final class SpeechController: NSObject {
     
     /// Sets pipeline and avSpeechSynthesizer  delegate to nil
     deinit {
-        
         pipeline.speechDelegate = nil
-        avSpeechSynthesizer.delegate = nil
     }
     
     /// Initializes `tts` by setting this class as it's delegate and default `SpeechConfiguration`
     override init() {
         
         super.init()
-        
-        avSpeechSynthesizer.delegate = self
         tts = TextToSpeech(self, configuration: SpeechConfiguration())
     }
     
@@ -124,8 +133,50 @@ final class SpeechController: NSObject {
     func respond(_ text: String) -> Void {
 
         let input = TextToSpeechInput(text)
-        self.tts?.synthesize(input)
+        
+        self.tts?.synthesizePublisher(input)
+        .tryMap {result -> URL in
+        
+            guard let url: URL = result.url else {
+                throw SpeechControllerErrors.invalidRemoteURL
+            }
+            
+            return url
+        }
+        .sink(receiveCompletion: {_ in }, receiveValue: {resultURL in
+            self.synthesizeHasFinished.send(resultURL)
+        })
+        .store(in: &self.subscriptions)
     }
+    
+    /// Plays `AVPlayerItem` instance for the given url
+    /// - Parameter url: `URL` of sound file
+    /// - Returns: Void
+    func play(_ url: URL) -> Void {
+        
+        let playerItem = AVPlayerItem(url: url)
+        self.playItem(playerItem)
+    }
+    
+    func processFeedItemsDescriptionsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
+        
+        let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
+        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
+
+        return headlinesPublisher
+            .tryMap{results -> [URL] in
+                return results.compactMap{$0.url}
+            }
+            .flatMap{urls in
+                return Publishers.MergeMany(
+                    urls.map(self.processAudioURL)
+                )
+                .collect()
+                .eraseToAnyPublisher()
+            }
+            .eraseToAnyPublisher()
+    }
+
     
     // MARK: Private (methods)
     
@@ -173,44 +224,60 @@ final class SpeechController: NSObject {
         
         let _ = NotificationCenter.default
             .publisher(for: NSNotification.Name.AVPlayerItemDidPlayToEndTime, object: playerItem)
-            .map({ $0.object as! AVPlayerItem })
+            .map{ $0.object as! AVPlayerItem }
             .sink(
                 receiveCompletion: {_ in },
                 receiveValue: { value in
-                    
-                    print("what is my value \(String(describing: value))")
-
                     self.itemFinishedPublisher.send(value)
                 }
             )
             .store(in: &self.subscriptions)
     }
-}
+    
+    
+    /// Fetches the remote sound file and save it locally
+    /// - Parameter url: Remote `URL` of file
+    /// - Returns: `AnyPublisher<URL, Error>`
+    private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {
+        
+        return self.fetchSoundFile(url)
+        .tryMap{data -> URL in
+            return try self.processMP3(data)
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    /// Fetches the remote sounds file
+    /// - Parameter remoteURL: `URL` of file
+    /// - Returns: `AnyPublisher<Data, Error>`
+    private func fetchSoundFile(_ remoteURL: URL) -> AnyPublisher<Data, Error> {
 
-extension SpeechController: AVSpeechSynthesizerDelegate {
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        print("sp did start \(utterance)")
+        return URLSession.shared.dataTaskPublisher(for: remoteURL)
+        .mapError { $0 as Error }
+        .map { $0.data }
+        .eraseToAnyPublisher()
     }
     
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        print("sp did finish \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-        print("sp did pause \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-        print("sp did continue \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        print("sp did cancel \(utterance)")
-    }
-    
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        print("sp willSpeakRangeOfSpeechString \(utterance)")
+    /// Saves the audio data locally to an mp3
+    /// - Parameter data: Audio `Data`
+    /// - Returns: `URL`
+    /// - Throws: `SpeechControllerErrors.failedToCache`
+    private func processMP3(_ data: Data) throws -> URL {
+        
+        let filename: String = UUID().uuidString + ".mp3"
+        let documentDirectory: URL = FileManager.spk_documentsDir!
+        let fileURL: URL = documentDirectory.appendingPathComponent(filename)
+
+        do {
+            
+            try data.write(to: fileURL)
+            
+        } catch {
+            
+            throw SpeechControllerErrors.failedToCache
+        }
+        
+        return fileURL
     }
 }
 
@@ -280,12 +347,69 @@ extension SpeechController: PipelineDelegate {
 
 extension SpeechController: TextToSpeechDelegate {
     
+    func success(result: TextToSpeechResult) {
+        print("result \(result)")
+    }
+    
+    func didBeginSpeaking() {
+        print("didBeginSpeaking")
+    }
+    
+    func didFinishSpeaking() {
+        print("didFinishSpeaking")
+    }
+    
+    
     /// The results from calling`parse`
     /// - Parameter url: `URL` to the synth'd text to speech
     func success(url: URL) {
 
-        let playerItem = AVPlayerItem(url: url)
-        self.playItem(playerItem)
+//        /// Fetch, save and publish the saved item / url
+//
+//        self.fetchSoundFile(url)
+//            .sink(receiveCompletion: {completion in
+//
+//            switch completion {
+//                case .finished:
+//                    break
+//                case .failure(let anError):
+//                    print("received error: ", anError)
+//            }
+//
+//        }, receiveValue: {data in
+//
+//            /// If there is a current item and ttstype then save the mp3 locally
+//            /// Based upon the type set the `cachedHeadlineLink` or
+//            /// `cachedDescriptionLink` property
+//
+//            if var currentItem: RSSFeedItem = self.feedItem,
+//                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
+//
+//                let filename: String = UUID().uuidString + ".mp3"
+//
+//                let documentDirectory: URL = FileManager.spk_documentsDir!
+//                let fileURL: URL = documentDirectory.appendingPathComponent(filename)
+//
+//                try? data.write(to: fileURL)
+//
+//                if itemTTSType == .headline {
+//
+//                    currentItem.cachedHeadlineLink = fileURL
+//
+//                } else {
+//
+//                    currentItem.cachedDescriptionLink = fileURL
+//                }
+//
+//                self.synthesizeFeedItemHasFinished.send(currentItem)
+//                self.feedItem = nil
+//
+//            } else {
+//
+//                self.synthesizeHasFinished.send(url)
+//            }
+//        })
+//        .store(in: &self.subscriptions)
     }
     
     func failure(error: Error) {
