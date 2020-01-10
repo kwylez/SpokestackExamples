@@ -33,8 +33,6 @@ final class SpeechController: NSObject {
     /// Subject that publishes when a synthesized item is finished and sends the remote URL
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
     
-    let queuedController: TextToSpeechQueue = TextToSpeechQueue()
-    
     // MARK: Private (properties)
     
     /// Holds a references to any of the publishers to be cancelled during
@@ -134,7 +132,7 @@ final class SpeechController: NSObject {
 
         let input = TextToSpeechInput(text)
         
-        self.tts?.synthesizePublisher(input)
+        self.tts?.synthesize(input)
         .tryMap {result -> URL in
         
             guard let url: URL = result.url else {
@@ -158,10 +156,15 @@ final class SpeechController: NSObject {
         self.playItem(playerItem)
     }
     
+    /// Synthesizes and caches audio locally
+    /// - Parameter items: `Array<RSSFeedItem>`
+    /// - Returns: `AnyPublisher<[URL], Error>`
     func processFeedItemsDescriptionsPublisher(_ items: Array<RSSFeedItem>) -> AnyPublisher<[URL], Error> {
         
+        precondition(self.tts != nil, "TextToSpeech instance can't be nil")
+        
         let headlineInputs: Array<TextToSpeechInput> = items.map{ TextToSpeechInput($0.description) }
-        let headlinesPublisher = self.queuedController.synthesize(headlineInputs)
+        let headlinesPublisher = self.tts!.synthesize(headlineInputs)
 
         return headlinesPublisher
             .tryMap{results -> [URL] in
@@ -172,7 +175,6 @@ final class SpeechController: NSObject {
                     urls.map(self.processAudioURL)
                 )
                 .collect()
-                .eraseToAnyPublisher()
             }
             .eraseToAnyPublisher()
     }
