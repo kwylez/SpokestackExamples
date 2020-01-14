@@ -513,7 +513,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"SpokestackRSSReader/Preview Content\"";
-				DEVELOPMENT_TEAM = XM4VAKDQL9;
+				DEVELOPMENT_TEAM = Z7TPYC529T;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = SpokestackRSSReader/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -521,9 +521,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.corywiles.SpokestackRSSReader;
+				PRODUCT_BUNDLE_IDENTIFIER = io.spokestack.SpokestackRSSReader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development io.spokestack.SpokestackRSSReader";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -539,7 +539,7 @@
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"SpokestackRSSReader/Preview Content\"";
-				DEVELOPMENT_TEAM = XM4VAKDQL9;
+				DEVELOPMENT_TEAM = Z7TPYC529T;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = SpokestackRSSReader/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -547,9 +547,9 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.corywiles.SpokestackRSSReader;
+				PRODUCT_BUNDLE_IDENTIFIER = io.spokestack.SpokestackRSSReader;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore io.spokestack.SpokestackRSSReader";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
