@@ -132,11 +132,12 @@ final class SpeechController: NSObject {
 
         let input = TextToSpeechInput(text)
         
-        self.tts?.synthesize(input)
-        .tryMap {result -> URL in
-        
-            guard let url: URL = result.url else {
-                throw SpeechControllerErrors.invalidRemoteURL
+        self.tts?.synthesize([input])
+        .tryMap {results -> URL in
+            guard let result: TextToSpeechResult = results.first,
+                let url: URL = result.url else {
+                
+                    throw SpeechControllerErrors.invalidRemoteURL
             }
             
             return url
