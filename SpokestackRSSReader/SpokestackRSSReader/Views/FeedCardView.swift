@@ -75,7 +75,10 @@ struct FeedCardView: View {
         .cornerRadius(10.0)
         .shadow(color: Color.gray.opacity(0.4), radius: 5.0)
         .scaleEffect(isCurrent ? 1.05 : 1)
-        .animation(.easeInOut(duration: 0.3))
+        .animation(.interpolatingSpring(mass: 1,
+                                        stiffness: 50,
+                                        damping: 7,
+                                        initialVelocity: 0))
     }
     
     // MARK: Private (properties)
