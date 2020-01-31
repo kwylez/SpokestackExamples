@@ -9,8 +9,19 @@
 import SwiftUI
 
 struct WaveView: View {
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+    
+        ZStack {
+            Spacer()
+            WaveShape(graphWidth: 0.8, amplitude: 0.05)
+                .fill(Color("Blue"))
+                .opacity(0.10)
+
+            WaveShape(graphWidth: 0.5, amplitude: 0.02)
+                .fill(Color("Blue"))
+                .opacity(0.25)
+        }
     }
 }
 
