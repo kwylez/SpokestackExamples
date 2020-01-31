@@ -19,7 +19,7 @@ struct WaveShape: Shape {
         let width = rect.width
         let height = rect.height
 
-        let origin = CGPoint(x: 0, y: height * 0.50)
+        let origin = CGPoint(x: 0, y: height * 0.90)
 
         var path = Path()
         path.move(to: origin)
