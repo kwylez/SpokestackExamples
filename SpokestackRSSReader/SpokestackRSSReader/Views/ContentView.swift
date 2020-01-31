@@ -78,7 +78,9 @@ struct ContentView: View {
                     
                     VStack {
                         Spacer()
-                        WaveView()
+//                        WaveView()
+                        FloatingActionButton()
+                        .padding(.bottom, 40.0)
                     }
                     .edgesIgnoringSafeArea(.bottom)
                 }
