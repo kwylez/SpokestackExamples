@@ -18,6 +18,8 @@
 		01347008237F5E2E00AD3588 /* RSSController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347007237F5E2E00AD3588 /* RSSController.swift */; };
 		0134700A237FA7DA00AD3588 /* RSSFeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01347009237FA7DA00AD3588 /* RSSFeedItem.swift */; };
 		013DB67A23A34B1F001E7284 /* FileManager+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 013DB67923A34B1F001E7284 /* FileManager+Extensions.swift */; };
+		015C972523E3A7DE00FD3A20 /* WaveShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015C972423E3A7DD00FD3A20 /* WaveShape.swift */; };
+		015C972823E3A84C00FD3A20 /* WaveView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 015C972723E3A84C00FD3A20 /* WaveView.swift */; };
 		016B53992395B20800EE94EA /* Detect.lite in Resources */ = {isa = PBXBuildFile; fileRef = 016B53982395B20700EE94EA /* Detect.lite */; };
 		016B539E2395B33400EE94EA /* Detect.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 016B539A2395B33400EE94EA /* Detect.mlmodel */; };
 		016B539F2395B33400EE94EA /* Filter.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 016B539B2395B33400EE94EA /* Filter.mlmodel */; };
@@ -50,6 +52,8 @@
 		01347007237F5E2E00AD3588 /* RSSController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSController.swift; sourceTree = "<group>"; };
 		01347009237FA7DA00AD3588 /* RSSFeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RSSFeedItem.swift; sourceTree = "<group>"; };
 		013DB67923A34B1F001E7284 /* FileManager+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FileManager+Extensions.swift"; sourceTree = "<group>"; };
+		015C972423E3A7DD00FD3A20 /* WaveShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveShape.swift; sourceTree = "<group>"; };
+		015C972723E3A84C00FD3A20 /* WaveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveView.swift; sourceTree = "<group>"; };
 		016B53982395B20700EE94EA /* Detect.lite */ = {isa = PBXFileReference; lastKnownFileType = file; path = Detect.lite; sourceTree = "<group>"; };
 		016B539A2395B33400EE94EA /* Detect.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Detect.mlmodel; sourceTree = "<group>"; };
 		016B539B2395B33400EE94EA /* Filter.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = Filter.mlmodel; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				01FA103B239B5481004A1AA3 /* ImageView.swift */,
 				01DF9697238C751400DC3A83 /* SafariView.swift */,
 				011D48E1237DB6E200EA951E /* SceneDelegate.swift */,
+				015C972723E3A84C00FD3A20 /* WaveView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -160,6 +165,7 @@
 				0197F2332398263A002A1C6F /* Machine Learning */,
 				01025B262380731300809F88 /* Models */,
 				011D48E7237DB6E400EA951E /* Preview Content */,
+				015C972623E3A82B00FD3A20 /* Shapes */,
 				01025B23238072A300809F88 /* UI */,
 				01DF9694238C748600DC3A83 /* View Controllers */,
 				01025B272380731B00809F88 /* View Models */,
@@ -174,6 +180,14 @@
 				011D48E8237DB6E400EA951E /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		015C972623E3A82B00FD3A20 /* Shapes */ = {
+			isa = PBXGroup;
+			children = (
+				015C972423E3A7DD00FD3A20 /* WaveShape.swift */,
+			);
+			path = Shapes;
 			sourceTree = "<group>";
 		};
 		0197F2332398263A002A1C6F /* Machine Learning */ = {
@@ -364,11 +378,13 @@
 				01DF9698238C751400DC3A83 /* SafariView.swift in Sources */,
 				011D48E2237DB6E200EA951E /* SceneDelegate.swift in Sources */,
 				0197F23523982A2A002A1C6F /* RemoteImageController.swift in Sources */,
+				015C972823E3A84C00FD3A20 /* WaveView.swift in Sources */,
 				01347008237F5E2E00AD3588 /* RSSController.swift in Sources */,
 				016B539F2395B33400EE94EA /* Filter.mlmodel in Sources */,
 				011AB469239C205900ADB1E6 /* AVPlayer+Extensions.swift in Sources */,
 				01DF9696238C749F00DC3A83 /* CustomSafariViewController.swift in Sources */,
 				011D48E4237DB6E200EA951E /* ContentView.swift in Sources */,
+				015C972523E3A7DE00FD3A20 /* WaveShape.swift in Sources */,
 				0174EBE32389B3AE00A7EAA7 /* FeedCardViewDivider.swift in Sources */,
 				013DB67A23A34B1F001E7284 /* FileManager+Extensions.swift in Sources */,
 				017B2A602382E84B004FA244 /* SpeechController.swift in Sources */,
