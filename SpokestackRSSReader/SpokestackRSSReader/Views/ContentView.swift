@@ -37,53 +37,52 @@ struct ContentView: View {
     
         NavigationView {
             
-            GeometryReader{ reader in
-                
-                ZStack {
-                    List {
-                        Section(footer: FeedFooterView()) {
-                            ForEach(self.viewModel.feedItems, id: \.publishedDate) { item in
-                                
-                                FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
-                                    
-                                    self.viewModel.readArticleDescription(feedItem)
-
-                                }, seeMoreCallback: {url in
-
-                                    self.feedItemURL = url
-                                    self.showModal = true
-
-                                }, currentItem: self.$currentItem)
-                            }
-                        }
-                    }
-                    .listStyle(GroupedListStyle())
-                    .onReceive(self.viewModel.$currentItem, perform: {newItem in
-                        DispatchQueue.main.async {
+            ZStack {
+                List {
+                    Section(footer: FeedFooterView()) {
+                        ForEach(self.viewModel.feedItems, id: \.publishedDate) { item in
                             
-                            if self.viewModel.currentItem != nil {
-                                self.currentItem = newItem
-                            }
+                            FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
+                                
+                                self.viewModel.readArticleDescription(feedItem)
+
+                            }, seeMoreCallback: {url in
+
+                                self.feedItemURL = url
+                                self.showModal = true
+
+                            }, currentItem: self.$currentItem)
                         }
-                    })
-                    .onAppear{
-                        self.viewModel.activateSpeech()
-                    }.onDisappear() {
-                        self.viewModel.deactiveSpeech()
                     }
-                    .sheet(isPresented: self.$showModal, content: {
-                        SafariView(url: self.feedItemURL)
-                    })
-                    .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
-                    
-                    VStack {
-                        Spacer()
-//                        WaveView()
+                }
+                .listStyle(GroupedListStyle())
+                .onReceive(self.viewModel.$currentItem, perform: {newItem in
+                    DispatchQueue.main.async {
+                        
+                        if self.viewModel.currentItem != nil {
+                            self.currentItem = newItem
+                        }
+                    }
+                })
+                .onAppear{
+                    self.viewModel.activateSpeech()
+                }.onDisappear() {
+                    self.viewModel.deactiveSpeech()
+                }
+                .sheet(isPresented: self.$showModal, content: {
+                    SafariView(url: self.feedItemURL)
+                })
+                .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
+                
+                VStack {
+                    Spacer()
+                    ZStack(alignment: .bottom) {
+                        WaveView()
                         FloatingActionButton()
                         .padding(.bottom, 40.0)
                     }
-                    .edgesIgnoringSafeArea(.bottom)
                 }
+                .edgesIgnoringSafeArea(.bottom)
             }
         }
     }
