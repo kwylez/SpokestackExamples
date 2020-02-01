@@ -230,6 +230,7 @@ class RSSViewModel: ObservableObject {
                         self?.processNextItem()
                     }
                 }
+
             } else {
 
                 if self.shouldAnnounceFinishMessage {
