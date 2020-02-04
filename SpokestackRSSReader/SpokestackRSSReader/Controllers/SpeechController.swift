@@ -16,6 +16,8 @@ enum SpeechControllerErrors: Error {
     case invalidRemoteURL
 }
 
+typealias PlayerItemTimeValue = (item: AVPlayerItem, elapsedTime: Double, itemDuration: Double)
+
 /// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
@@ -33,9 +35,11 @@ final class SpeechController: NSObject {
     /// Subject that publishes when a synthesized item is finished and sends the remote URL
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
     
-    private var timeObserverToken: Any?
+    let timeValueChanged = PassthroughSubject<PlayerItemTimeValue, Never>()
     
     // MARK: Private (properties)
+    
+    private var timeObserverToken: Any?
     
     /// Holds a references to any of the publishers to be cancelled during
     /// deallocation
@@ -91,6 +95,7 @@ final class SpeechController: NSObject {
     
     /// Sets pipeline and avSpeechSynthesizer  delegate to nil
     deinit {
+        
         pipeline.speechDelegate = nil
         removeTimeObserver()
     }
@@ -188,12 +193,22 @@ final class SpeechController: NSObject {
     
     private func addTimeObserver() -> Void {
         
-        // Notify every half second
+        self.removeTimeObserver()
+        
+        /// Notify every half second
+        
         let timeScale = CMTimeScale(NSEC_PER_SEC)
         let time = CMTime(seconds: 0.5, preferredTimescale: timeScale)
 
-        timeObserverToken = player.addPeriodicTimeObserver(forInterval: time, queue: .main) {time in
-            print("what is the time \(time.seconds) and duration \(String(describing: self.player.currentItem?.duration.seconds))")
+        self.timeObserverToken = self.player.addPeriodicTimeObserver(forInterval: time, queue: .main) {time in
+            
+            if let currentItem: AVPlayerItem = self.player.currentItem {
+             
+                self.timeValueChanged.send((currentItem, time.seconds, currentItem.duration.seconds))
+                print("""
+                    what is the time \(time.seconds) and duration \(String(describing: currentItem.duration.seconds))
+                """)
+            }
         }
     }
     
@@ -234,10 +249,10 @@ final class SpeechController: NSObject {
                                                             .defaultToSpeaker
                                                          ]
         )
+
         try? AVAudioSession.sharedInstance().setActive(true)
-        
-        self.removeTimeObserver()
-        self.player = AVPlayer(playerItem: playerItem)
+
+        self.player.replaceCurrentItem(with: playerItem)
         self.addTimeObserver()
         self.player.play()
         self.listenToNotification(playerItem)

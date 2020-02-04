@@ -32,6 +32,8 @@ class RSSViewModel: ObservableObject {
     /// It will be published to any subscribers
     @Published private (set) var currentItem: RSSFeedItem?
     
+    @Published private (set) var itemPlaybackProgress: Float = 0.0
+    
     // MARK: Private (properties)
     
     /// Whether or not the current item's description is being read
@@ -258,6 +260,17 @@ class RSSViewModel: ObservableObject {
                     self.shouldAnnounceWelcome.toggle()
                     return
                 }
+        })
+        .store(in: &self.subscriptions)
+        
+        self.speechController.timeValueChanged
+        .sink(receiveValue: {timeValue in
+            
+            let duration: Double = timeValue.itemDuration
+            let elapsedTime: Double = timeValue.elapsedTime
+            let percentage: Float = Float((elapsedTime / duration) * 100)
+            
+            self.itemPlaybackProgress = percentage
         })
         .store(in: &self.subscriptions)
     }

@@ -33,6 +33,8 @@ struct ContentView: View {
     
     @State private var showModal: Bool = false
     
+    @State var percentage: Float = 0.0
+    
     var body: some View {
     
         NavigationView {
@@ -64,6 +66,9 @@ struct ContentView: View {
                         }
                     }
                 })
+                .onReceive(self.viewModel.$itemPlaybackProgress, perform: {percentage in
+                    self.percentage = percentage
+                })
                 .onAppear{
                     self.viewModel.activateSpeech()
                 }.onDisappear() {
@@ -78,7 +83,7 @@ struct ContentView: View {
                     Spacer()
                     ZStack(alignment: .bottom) {
                         WaveView()
-                        FloatingActionButton()
+                        FloatingActionButton(percentage: $percentage)
                         .padding(.bottom, 40.0)
                     }
                 }
