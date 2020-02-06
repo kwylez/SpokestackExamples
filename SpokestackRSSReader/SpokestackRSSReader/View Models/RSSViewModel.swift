@@ -34,6 +34,8 @@ class RSSViewModel: ObservableObject {
     
     @Published private (set) var itemPlaybackProgress: Float = 0.0
     
+    @Published private (set) var actionButtonStatus: FloatingActionButtonStatus = .unknown
+    
     // MARK: Private (properties)
     
     /// Whether or not the current item's description is being read
@@ -189,7 +191,7 @@ class RSSViewModel: ObservableObject {
         self.speechController
             .itemFinishedPublisher
             .sink(receiveValue: {value in
-
+                
             self.processingCurrentItemDescription = false
 
             /// The "welcome" has finished playing, but none of the headlines  have been read if the feed items
@@ -211,6 +213,10 @@ class RSSViewModel: ObservableObject {
                         return
                     }
 
+                    DispatchQueue.main.async {
+                        strongSelf.actionButtonStatus = .isListening
+                    }
+                    
                     if !strongSelf.workerItem.isCancelled {
                         strongSelf.speechController.activatePipelineASR()
                     } else {
@@ -226,7 +232,8 @@ class RSSViewModel: ObservableObject {
                 workItemQueue.asyncAfter(deadline: .now() + App.actionDelay) {[weak self] in
 
                     DispatchQueue.main.async {
-                        
+
+                        self?.actionButtonStatus = .isPaused
                         self?.speechController.activatePipelineASR()
                         self?.workerItem?.cancel()
                         self?.processNextItem()
@@ -238,7 +245,8 @@ class RSSViewModel: ObservableObject {
                 if self.shouldAnnounceFinishMessage {
 
                      UIApplication.shared.isIdleTimerDisabled = false
-                     
+
+                     self.actionButtonStatus = .isPaused
                      self.isFinished.toggle()
                      self.deactiveSpeech()
                      self.speechController.respond(App.finishedMessage)
@@ -289,6 +297,8 @@ class RSSViewModel: ObservableObject {
             self.queuedItems.remove(at: 0)
             self.currentItem = nextItem
             self.speechController.respond(nextItem.title)
+            
+            self.actionButtonStatus = .isPlaying
         }
     }
 }

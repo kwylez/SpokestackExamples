@@ -33,7 +33,9 @@ struct ContentView: View {
     
     @State private var showModal: Bool = false
     
-    @State var percentage: Float = 0.0
+    @State var actionButtonStatus: FloatingActionButtonStatus = .unknown
+    
+    @State var shouldAnimateListening: Bool = false
     
     var body: some View {
     
@@ -66,8 +68,15 @@ struct ContentView: View {
                         }
                     }
                 })
-                .onReceive(self.viewModel.$itemPlaybackProgress, perform: {percentage in
-                    self.percentage = percentage
+                .onReceive(self.viewModel.$actionButtonStatus, perform: {status in
+                    
+                    self.actionButtonStatus = status
+                    
+                    if status == .isListening {
+                        self.shouldAnimateListening = true
+                    } else {
+                        self.shouldAnimateListening = false
+                    }
                 })
                 .onAppear{
                     self.viewModel.activateSpeech()
@@ -83,7 +92,10 @@ struct ContentView: View {
                     Spacer()
                     ZStack(alignment: .bottom) {
                         WaveView()
-                        FloatingActionButton(percentage: $percentage)
+                            .opacity(self.shouldAnimateListening ? 1 : 0)
+                            .animation(.spring())
+                        FloatingActionButton(actionButtonStatus: $actionButtonStatus,
+                                             shouldAnimateListening: $shouldAnimateListening)
                         .padding(.bottom, 40.0)
                     }
                 }

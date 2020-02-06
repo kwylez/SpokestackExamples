@@ -8,67 +8,74 @@
 
 import SwiftUI
 
+enum FloatingActionButtonStatus {
+    case isPlaying, isPaused, isListening, unknown
+}
+
 struct FloatingActionButton: View {
     
-    @Binding var percentage: Float
+    @Binding var actionButtonStatus: FloatingActionButtonStatus
     
-    @State private var isLoading = false
+    @Binding var shouldAnimateListening: Bool
     
     var body: some View {
-
-        let progress = 1 - (percentage / 100)
         
         return ZStack {
 
+            /// Play
+            
             Circle()
                 .fill(Color("Blue"))
                 .shadow(color: Color("Blue").opacity(0.7), radius: 10.0)
                 .shadow(color: Color("Blue").opacity(0.5), radius: 10.0)
-
-            Circle()
-                .trim(from: CGFloat(progress), to: 1)
-                .stroke(
-                    Color.red.opacity(0.5),
-                    style: StrokeStyle(lineWidth: 5, lineCap: .round)
-                )
-                .rotationEffect(Angle(degrees: 90))
-                .rotation3DEffect(Angle(degrees: 180),
-                                  axis: (x: 1, y: 0, z: 0))
+                .opacity(actionButtonStatus == .isPaused ? 1 : 0)
+                .animation(.default)
 
             Image(systemName: "play.fill")
                 .foregroundColor(Color("AquaMarine"))
                 .font(.system(size: 45.0, weight: .thin))
                 .padding(.leading, 8)
+                .opacity(actionButtonStatus == .isPaused ? 1 : 0)
+                .animation(.default)
+
+            /// Pause
+
+            Circle()
+                .fill(Color("LightBlue"))
+                .frame(width: 78.0, height: 78.0)
+                .shadow(color: Color("LightBlue").opacity(0.7), radius: 10.0)
+                .shadow(color: Color("LightBlue").opacity(0.5), radius: 10.0)
+                .opacity(actionButtonStatus == .isPlaying ? 1 : 0)
+                .animation(.default)
+
+            Image(systemName: "pause.fill")
+                .foregroundColor(Color("Blue"))
+                .font(.system(size: 45.0, weight: .thin))
+                .opacity(actionButtonStatus == .isPlaying ? 1 : 0)
+                .animation(.default)
             
-//            Circle()
-//                .fill(Color("LightBlue"))
-//                .frame(width: 78.0, height: 78.0)
-//                .shadow(color: Color("LightBlue").opacity(0.7), radius: 10.0)
-//                .shadow(color: Color("LightBlue").opacity(0.5), radius: 10.0)
-//
-//            Image(systemName: "pause.fill")
-//                .foregroundColor(Color("Blue"))
-//                .font(.system(size: 45.0, weight: .thin))
+            /// Listening
             
-//            Circle()
-//                .fill(Color("LightBlue"))
-//                .shadow(color: Color("LightBlue").opacity(0.7), radius: 10.0)
-//                .shadow(color: Color("LightBlue").opacity(0.5), radius: 10.0)
-//
-//            HStack {
-//
-//                ForEach(0...2, id: \.self) { index in
-//
-//                    Circle()
-//                        .frame(width: 10, height: 10)
-//                        .foregroundColor(Color("Blue"))
-//                        .scaleEffect(self.isLoading ? 0 : 1.2)
-//                        .animation(Animation.linear(duration: 0.6).repeatForever().delay(0.25 * Double(index)))
-//                }
-//            }
-//            .onAppear() {
-//                self.isLoading = true
-//            }
+            Circle()
+                .fill(Color("LightBlue"))
+                .shadow(color: Color("LightBlue").opacity(0.7), radius: 10.0)
+                .shadow(color: Color("LightBlue").opacity(0.5), radius: 10.0)
+                .opacity(actionButtonStatus == .isListening ? 1 : 0)
+                .animation(.default)
+
+            HStack {
+
+                ForEach(0...2, id: \.self) { index in
+
+                    Circle()
+                        .frame(width: 10, height: 10)
+                        .foregroundColor(Color("Blue"))
+                        .scaleEffect(self.shouldAnimateListening ? 1.2 : 0)
+                        .animation(Animation.linear(duration: 0.6).repeatForever().delay(0.25 * Double(index)))
+                }
+            }
+            .opacity(actionButtonStatus == .isListening ? 1 : 0)
+            .animation(.default)
         }
         .frame(width: 78.0, height: 78.0)
     }
@@ -77,7 +84,6 @@ struct FloatingActionButton: View {
 struct FloatingActionButton_Previews: PreviewProvider {
 
     static var previews: some View {
-
-        FloatingActionButton(percentage: .constant(88.0))
+        FloatingActionButton(actionButtonStatus: .constant(.unknown), shouldAnimateListening: .constant(false))
     }
 }
