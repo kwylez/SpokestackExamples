@@ -23,19 +23,19 @@ extension URL: Identifiable {
 
 struct ContentView: View {
     
-    // MARK: Internal (properties)
+    // MARK: Private (properties)
     
-    @ObservedObject var viewModel: RSSViewModel = RSSViewModel()
+    @ObservedObject private var viewModel: RSSViewModel = RSSViewModel()
     
-    @State var feedItemURL: URL? = nil
+    @State private var feedItemURL: URL? = nil
     
-    @State var currentItem: RSSFeedItem? = nil
+    @State private var currentItem: RSSFeedItem? = nil
     
     @State private var showModal: Bool = false
     
-    @State var actionButtonStatus: FloatingActionButtonStatus = .unknown
+    @State private var actionButtonStatus: FloatingActionButtonStatus = .unknown
     
-    @State var shouldAnimateListening: Bool = false
+    @State private var shouldAnimateListening: Bool = false
     
     var body: some View {
     
@@ -61,6 +61,7 @@ struct ContentView: View {
                 }
                 .listStyle(GroupedListStyle())
                 .onReceive(self.viewModel.$currentItem, perform: {newItem in
+                    
                     DispatchQueue.main.async {
                         
                         if self.viewModel.currentItem != nil {
