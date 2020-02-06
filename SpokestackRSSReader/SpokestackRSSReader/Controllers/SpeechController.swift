@@ -35,8 +35,6 @@ final class SpeechController: NSObject {
     /// Subject that publishes when a synthesized item is finished and sends the remote URL
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
     
-    let timeValueChanged = PassthroughSubject<PlayerItemTimeValue, Never>()
-    
     // MARK: Private (properties)
     
     private var timeObserverToken: Any?
@@ -95,9 +93,7 @@ final class SpeechController: NSObject {
     
     /// Sets pipeline and avSpeechSynthesizer  delegate to nil
     deinit {
-        
         pipeline.speechDelegate = nil
-        removeTimeObserver()
     }
     
     /// Initializes `tts` by setting this class as it's delegate and default `SpeechConfiguration`
@@ -191,35 +187,6 @@ final class SpeechController: NSObject {
     
     // MARK: Private (methods)
     
-    private func addTimeObserver() -> Void {
-        
-        self.removeTimeObserver()
-        
-        /// Notify every half second
-        
-        let timeScale = CMTimeScale(NSEC_PER_SEC)
-        let time = CMTime(seconds: 0.5, preferredTimescale: timeScale)
-
-        self.timeObserverToken = self.player.addPeriodicTimeObserver(forInterval: time, queue: .main) {time in
-            
-            if let currentItem: AVPlayerItem = self.player.currentItem {
-             
-                self.timeValueChanged.send((currentItem, time.seconds, currentItem.duration.seconds))
-                print("""
-                    what is the time \(time.seconds) and duration \(String(describing: currentItem.duration.seconds))
-                """)
-            }
-        }
-    }
-    
-    private func removeTimeObserver() -> Void {
-        
-        if let timeObserverToken = timeObserverToken {
-            player.removeTimeObserver(timeObserverToken)
-            self.timeObserverToken = nil
-        }
-    }
-    
     /// If the current transcript value contains the the `App.actionPhrase` then
     /// the `textPublisher` instance will send it to any subscribers and the
     /// `SpeechPipeline` is stopped.
@@ -253,7 +220,6 @@ final class SpeechController: NSObject {
         try? AVAudioSession.sharedInstance().setActive(true)
 
         self.player.replaceCurrentItem(with: playerItem)
-        self.addTimeObserver()
         self.player.play()
         self.listenToNotification(playerItem)
     }
