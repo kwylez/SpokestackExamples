@@ -90,6 +90,13 @@ struct ContentView: View {
                 .sheet(isPresented: self.$showModal, content: {
                     SafariView(url: self.feedItemURL)
                 })
+                .sheet(isPresented: self.$showContent, content: {
+                    
+                    FeedItemDescriptionView(showContent: self.$showContent,
+                                            currentItem: self.$currentItem,
+                                            feedItemURL: self.$feedItemURL,
+                                            showModal: self.$showModal)
+                })
                 .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
                 
                 VStack {
@@ -104,28 +111,6 @@ struct ContentView: View {
                     }
                 }
                 .edgesIgnoringSafeArea(.bottom)
-
-                if self.showContent {
-                    
-                    Color.black
-                        .edgesIgnoringSafeArea(.all)
-                        .opacity(0.7)
-                        .onTapGesture {
-                            self.showContent.toggle()
-                    }
-                    
-                    /// Note:
-                    /// You have to set the zIndex to 1 or the the "dismissal" will not animate properly
-                    
-                    FeedItemDescriptionView(showContent: $showContent,
-                                            currentItem: $currentItem,
-                                            feedItemURL: $feedItemURL,
-                                            showModal: $showModal)
-                        .transition(.move(edge: .bottom))
-                        .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0))
-                        .offset(x: 0, y: 150.0)
-                        .zIndex(1)
-                }
             }
         }
     }
