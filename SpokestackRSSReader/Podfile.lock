@@ -10,15 +10,18 @@ PODS:
 
 DEPENDENCIES:
   - FeedKit (~> 9.0)
-  - Spokestack-iOS
+  - Spokestack-iOS (from `~/DevProjects/iOS/Spokestack-iOS`)
 
 SPEC REPOS:
   trunk:
     - FeedKit
     - filter_audio
-    - Spokestack-iOS
     - TensorFlowLiteC
     - TensorFlowLiteSwift
+
+EXTERNAL SOURCES:
+  Spokestack-iOS:
+    :path: "~/DevProjects/iOS/Spokestack-iOS"
 
 SPEC CHECKSUMS:
   FeedKit: 9ffa2434af293df73ac069129900498b3f89cb2e
@@ -27,6 +30,6 @@ SPEC CHECKSUMS:
   TensorFlowLiteC: a6702011fb661928634e59565b5fe262f69692d0
   TensorFlowLiteSwift: ac8c816ae2d65f631a96151e7991c46412aec7eb
 
-PODFILE CHECKSUM: df80a3d78e086e641792eb01b58230c4a91371e4
+PODFILE CHECKSUM: 1f18075596bdba1643284c1df0fd9132ecfd724c
 
 COCOAPODS: 1.8.4

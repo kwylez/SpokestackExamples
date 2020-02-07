@@ -16,6 +16,8 @@ enum SpeechControllerErrors: Error {
     case invalidRemoteURL
 }
 
+typealias PlayerItemTimeValue = (item: AVPlayerItem, elapsedTime: Double, itemDuration: Double)
+
 /// Controller class for controlling an RSS feed
 final class SpeechController: NSObject {
     
@@ -34,6 +36,8 @@ final class SpeechController: NSObject {
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
     
     // MARK: Private (properties)
+    
+    private var timeObserverToken: Any?
     
     /// Holds a references to any of the publishers to be cancelled during
     /// deallocation
@@ -212,9 +216,10 @@ final class SpeechController: NSObject {
                                                             .defaultToSpeaker
                                                          ]
         )
+
         try? AVAudioSession.sharedInstance().setActive(true)
-        
-        self.player = AVPlayer(playerItem: playerItem)
+
+        self.player.replaceCurrentItem(with: playerItem)
         self.player.play()
         self.listenToNotification(playerItem)
     }

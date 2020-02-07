@@ -42,27 +42,28 @@ struct FeedCardView: View {
             FeedCardViewDivider()
             HStack {
                 Text("\"Tell me more\"")
-                .fontWeight(.bold)
-                .foregroundColor(Color("Blue"))
-                .padding([.leading, .trailing], 20.0)
-                .onTapGesture {
-                    self.tellMoreCallback?(self.feedItem)
-                }
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Blue"))
+                    .padding([.leading, .trailing], 20.0)
+                    .onTapGesture {
+                        self.tellMoreCallback?(self.feedItem)
+                    }
                 Rectangle()
-                .fill(Color("Gray"))
-                .frame(width: 1)
-                .padding([.leading, .trailing], 10.0)
+                    .fill(Color.black)
+                    .opacity(0.10)
+                    .frame(width: 1)
+                    .padding([.leading, .trailing], 10.0)
                 Spacer()
                 Text("See It")
-                .fontWeight(.bold)
-                .foregroundColor(Color("Blue"))
-                .padding([.leading, .trailing], 10.0)
-                .onTapGesture {
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Blue"))
+                    .padding([.leading, .trailing], 10.0)
+                    .onTapGesture {
 
-                    if let url: URL = URL(string: self.feedItem.link) {
-                        self.seeMoreCallback?(url)
+                        if let url: URL = URL(string: self.feedItem.link) {
+                            self.seeMoreCallback?(url)
+                        }
                     }
-                }
                 Spacer()
             }
             .padding()
@@ -75,7 +76,10 @@ struct FeedCardView: View {
         .cornerRadius(10.0)
         .shadow(color: Color.gray.opacity(0.4), radius: 5.0)
         .scaleEffect(isCurrent ? 1.05 : 1)
-        .animation(.easeInOut(duration: 0.3))
+        .animation(.interpolatingSpring(mass: 1,
+                                        stiffness: 50,
+                                        damping: 7,
+                                        initialVelocity: 0))
     }
     
     // MARK: Private (properties)

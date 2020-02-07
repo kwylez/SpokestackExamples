@@ -23,55 +23,95 @@ extension URL: Identifiable {
 
 struct ContentView: View {
     
-    // MARK: Internal (properties)
-    
-    @ObservedObject var viewModel: RSSViewModel = RSSViewModel()
+    @State var showContent: Bool = false
     
     @State var feedItemURL: URL? = nil
     
-    @State var currentItem: RSSFeedItem? = nil
+    @State var showModal: Bool = false
     
-    @State private var showModal: Bool = false
+    // MARK: Private (properties)
+    
+    @ObservedObject private var viewModel: RSSViewModel = RSSViewModel()
+    
+    @State private var currentItem: RSSFeedItem? = nil
+    
+    @State private var actionButtonStatus: FloatingActionButtonStatus = .unknown
+    
+    @State private var shouldAnimateListening: Bool = false
     
     var body: some View {
     
         NavigationView {
             
-            List {
-                Section(footer: FeedFooterView()) {
-                    ForEach(self.viewModel.feedItems, id: \.publishedDate) { item in
-                        
-                        FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
+            ZStack {
+                List {
+                    Section(footer: FeedFooterView()) {
+                        ForEach(self.viewModel.feedItems, id: \.publishedDate) { item in
                             
-                            self.viewModel.readArticleDescription(feedItem)
+                            FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
+                                
+                                self.viewModel.readArticleDescription(feedItem)
+                                self.showContent = true
 
-                        }, seeMoreCallback: {url in
+                            }, seeMoreCallback: {url in
 
-                            self.feedItemURL = url
-                            self.showModal = true
+                                self.feedItemURL = url
+                                self.showModal = true
 
-                        }, currentItem: self.$currentItem)
+                            }, currentItem: self.$currentItem)
+                        }
                     }
                 }
-            }
-            .listStyle(GroupedListStyle())
-            .onReceive(self.viewModel.$currentItem, perform: {newItem in
-                DispatchQueue.main.async {
+                .listStyle(GroupedListStyle())
+                .onReceive(self.viewModel.$currentItem, perform: {newItem in
                     
-                    if self.viewModel.currentItem != nil {
-                        self.currentItem = newItem
+                    DispatchQueue.main.async {
+                        
+                        if self.viewModel.currentItem != nil {
+                            self.currentItem = newItem
+                        }
+                    }
+                })
+                .onReceive(self.viewModel.$actionButtonStatus, perform: {status in
+                    
+                    self.actionButtonStatus = status
+                    
+                    if status == .isListening {
+                        self.shouldAnimateListening = true
+                    } else {
+                        self.shouldAnimateListening = false
+                    }
+                })
+                .onAppear{
+                    self.viewModel.activateSpeech()
+                }.onDisappear() {
+                    self.viewModel.deactiveSpeech()
+                }
+                .sheet(isPresented: self.$showModal, content: {
+                    SafariView(url: self.feedItemURL)
+                })
+                .sheet(isPresented: self.$showContent, content: {
+                    
+                    FeedItemDescriptionView(showContent: self.$showContent,
+                                            currentItem: self.$currentItem,
+                                            feedItemURL: self.$feedItemURL,
+                                            showModal: self.$showModal)
+                })
+                .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
+                
+                VStack {
+                    Spacer()
+                    ZStack(alignment: .bottom) {
+                        WaveView()
+                            .opacity(self.shouldAnimateListening ? 1 : 0)
+                            .animation(.spring())
+                        FloatingActionButton(actionButtonStatus: $actionButtonStatus,
+                                             shouldAnimateListening: $shouldAnimateListening)
+                        .padding(.bottom, 40.0)
                     }
                 }
-            })
-            .onAppear{
-                self.viewModel.activateSpeech()
-            }.onDisappear() {
-                self.viewModel.deactiveSpeech()
+                .edgesIgnoringSafeArea(.bottom)
             }
-            .sheet(isPresented: $showModal, content: {
-                SafariView(url: self.feedItemURL)
-            })
-            .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
         }
     }
     
