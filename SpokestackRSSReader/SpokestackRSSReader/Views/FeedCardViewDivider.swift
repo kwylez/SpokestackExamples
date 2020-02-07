@@ -15,8 +15,10 @@ struct FeedCardViewDivider: View {
     var body: some View {
     
         Rectangle()
-        .fill(Color("Gray"))
+        .fill(Color.black)
+        .opacity(0.10)
         .frame(height: 1)
+        .padding(.horizontal, 25.0)
     }
 }
 

@@ -25,15 +25,15 @@ struct ContentView: View {
     
     @State var showContent: Bool = false
     
+    @State var feedItemURL: URL? = nil
+    
+    @State var showModal: Bool = false
+    
     // MARK: Private (properties)
     
     @ObservedObject private var viewModel: RSSViewModel = RSSViewModel()
     
-    @State private var feedItemURL: URL? = nil
-    
     @State private var currentItem: RSSFeedItem? = nil
-    
-    @State private var showModal: Bool = false
     
     @State private var actionButtonStatus: FloatingActionButtonStatus = .unknown
     
@@ -107,13 +107,23 @@ struct ContentView: View {
 
                 if self.showContent {
                     
+                    Color.black
+                        .edgesIgnoringSafeArea(.all)
+                        .opacity(0.7)
+                        .onTapGesture {
+                            self.showContent.toggle()
+                    }
+                    
                     /// Note:
                     /// You have to set the zIndex to 1 or the the "dismissal" will not animate properly
                     
-                    FeedItemDescriptionView(showContent: $showContent, currentItem: $currentItem)
+                    FeedItemDescriptionView(showContent: $showContent,
+                                            currentItem: $currentItem,
+                                            feedItemURL: $feedItemURL,
+                                            showModal: $showModal)
                         .transition(.move(edge: .bottom))
                         .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0))
-                        .offset(x: 0, y: 300.0)
+                        .offset(x: 0, y: 150.0)
                         .zIndex(1)
                 }
             }
