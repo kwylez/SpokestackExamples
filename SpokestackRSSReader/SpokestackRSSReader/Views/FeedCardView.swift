@@ -42,28 +42,28 @@ struct FeedCardView: View {
             FeedCardViewDivider()
             HStack {
                 Text("\"Tell me more\"")
-                .fontWeight(.bold)
-                .foregroundColor(Color("Blue"))
-                .padding([.leading, .trailing], 20.0)
-                .onTapGesture {
-                    self.tellMoreCallback?(self.feedItem)
-                }
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Blue"))
+                    .padding([.leading, .trailing], 20.0)
+                    .onTapGesture {
+                        self.tellMoreCallback?(self.feedItem)
+                    }
                 Rectangle()
-                .fill(Color.black)
-                .opacity(0.10)
-                .frame(width: 1)
-                .padding([.leading, .trailing], 10.0)
+                    .fill(Color.black)
+                    .opacity(0.10)
+                    .frame(width: 1)
+                    .padding([.leading, .trailing], 10.0)
                 Spacer()
                 Text("See It")
-                .fontWeight(.bold)
-                .foregroundColor(Color("Blue"))
-                .padding([.leading, .trailing], 10.0)
-                .onTapGesture {
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("Blue"))
+                    .padding([.leading, .trailing], 10.0)
+                    .onTapGesture {
 
-                    if let url: URL = URL(string: self.feedItem.link) {
-                        self.seeMoreCallback?(url)
+                        if let url: URL = URL(string: self.feedItem.link) {
+                            self.seeMoreCallback?(url)
+                        }
                     }
-                }
                 Spacer()
             }
             .padding()
