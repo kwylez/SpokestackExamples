@@ -175,6 +175,8 @@ class RSSViewModel: ObservableObject {
                 self.queuedItems.remove(at: 0)
                 self.currentItem = item
                 self.speechController.respond(item.title)
+                
+                self.actionButtonStatus = .isPlaying
             }
         }
     }

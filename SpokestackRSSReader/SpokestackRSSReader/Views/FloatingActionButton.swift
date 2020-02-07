@@ -37,6 +37,9 @@ struct FloatingActionButton: View {
                 .padding(.leading, 8)
                 .opacity(actionButtonStatus == .isPaused ? 1 : 0)
                 .animation(.default)
+                .onTapGesture {
+                    self.actionButtonStatus = .isPlaying
+                }
 
             /// Pause
 
@@ -53,6 +56,9 @@ struct FloatingActionButton: View {
                 .font(.system(size: 45.0, weight: .thin))
                 .opacity(actionButtonStatus == .isPlaying ? 1 : 0)
                 .animation(.default)
+                .onTapGesture {
+                    self.actionButtonStatus = .isPaused
+                }
             
             /// Listening
             

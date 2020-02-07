@@ -23,6 +23,8 @@ extension URL: Identifiable {
 
 struct ContentView: View {
     
+    @State var showContent: Bool = false
+    
     // MARK: Private (properties)
     
     @ObservedObject private var viewModel: RSSViewModel = RSSViewModel()
@@ -49,6 +51,7 @@ struct ContentView: View {
                             FeedCardView(feedItem: item, tellMoreCallback: {feedItem in
                                 
                                 self.viewModel.readArticleDescription(feedItem)
+                                self.showContent = true
 
                             }, seeMoreCallback: {url in
 
@@ -101,6 +104,18 @@ struct ContentView: View {
                     }
                 }
                 .edgesIgnoringSafeArea(.bottom)
+
+                if self.showContent {
+                    
+                    /// Note:
+                    /// You have to set the zIndex to 1 or the the "dismissal" will not animate properly
+                    
+                    FeedItemDescriptionView(showContent: $showContent, currentItem: $currentItem)
+                        .transition(.move(edge: .bottom))
+                        .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0))
+                        .offset(x: 0, y: 300.0)
+                        .zIndex(1)
+                }
             }
         }
     }
