@@ -49,7 +49,8 @@ struct FeedCardView: View {
                     self.tellMoreCallback?(self.feedItem)
                 }
                 Rectangle()
-                .fill(Color("Gray"))
+                .fill(Color.black)
+                .opacity(0.10)
                 .frame(width: 1)
                 .padding([.leading, .trailing], 10.0)
                 Spacer()
