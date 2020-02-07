@@ -53,6 +53,7 @@ struct FeedItemDescriptionView: View {
                     .opacity(0.10)
                     .frame(width: 1, height: 34.0)
                     .padding([.leading], 10.0)
+                    
                     Spacer()
                     Button(action: {
                         
