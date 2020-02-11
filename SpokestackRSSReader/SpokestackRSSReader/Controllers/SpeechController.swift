@@ -37,8 +37,6 @@ final class SpeechController: NSObject {
     
     // MARK: Private (properties)
     
-    private var timeObserverToken: Any?
-    
     /// Holds a references to any of the publishers to be cancelled during
     /// deallocation
     private var subscriptions = Set<AnyCancellable>()
@@ -161,6 +159,18 @@ final class SpeechController: NSObject {
         self.playItem(playerItem)
     }
     
+    func pause() -> Void {
+        self.player.pause()
+    }
+    
+    func resumePlayback() -> Void {
+        self.player.play()
+    }
+    
+    var isPlaying: Bool {
+        return self.player.spk_isPlaying
+    }
+    
     /// Synthesizes and caches audio locally
     /// - Parameter items: `Array<RSSFeedItem>`
     /// - Returns: `AnyPublisher<[URL], Error>`
@@ -247,8 +257,9 @@ final class SpeechController: NSObject {
     /// - Parameter url: Remote `URL` of file
     /// - Returns: `AnyPublisher<URL, Error>`
     private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {
-        
+        print("url \(url)")
         return self.fetchSoundFile(url)
+        .print()
         .tryMap{data -> URL in
             return try self.processMP3(data)
         }

@@ -31,13 +31,7 @@ struct ContentView: View {
     
     // MARK: Private (properties)
     
-    @ObservedObject private var viewModel: RSSViewModel = RSSViewModel()
-    
-    @State private var currentItem: RSSFeedItem? = nil
-    
-    @State private var actionButtonStatus: FloatingActionButtonStatus = .unknown
-    
-    @State private var shouldAnimateListening: Bool = false
+    @EnvironmentObject var viewModel: RSSViewModel
     
     var body: some View {
     
@@ -58,30 +52,11 @@ struct ContentView: View {
                                 self.feedItemURL = url
                                 self.showModal = true
 
-                            }, currentItem: self.$currentItem)
+                            })
                         }
                     }
                 }
                 .listStyle(GroupedListStyle())
-                .onReceive(self.viewModel.$currentItem, perform: {newItem in
-                    
-                    DispatchQueue.main.async {
-                        
-                        if self.viewModel.currentItem != nil {
-                            self.currentItem = newItem
-                        }
-                    }
-                })
-                .onReceive(self.viewModel.$actionButtonStatus, perform: {status in
-                    
-                    self.actionButtonStatus = status
-                    
-                    if status == .isListening {
-                        self.shouldAnimateListening = true
-                    } else {
-                        self.shouldAnimateListening = false
-                    }
-                })
                 .onAppear{
                     self.viewModel.activateSpeech()
                 }.onDisappear() {
@@ -91,9 +66,8 @@ struct ContentView: View {
                     SafariView(url: self.feedItemURL)
                 })
                 .sheet(isPresented: self.$showContent, content: {
-                    
+
                     FeedItemDescriptionView(showContent: self.$showContent,
-                                            currentItem: self.$currentItem,
                                             feedItemURL: self.$feedItemURL,
                                             showModal: self.$showModal)
                 })
@@ -103,10 +77,9 @@ struct ContentView: View {
                     Spacer()
                     ZStack(alignment: .bottom) {
                         WaveView()
-                            .opacity(self.shouldAnimateListening ? 1 : 0)
+                            .opacity(self.viewModel.actionButtonStatus == .isListening ? 1 : 0)
                             .animation(.spring())
-                        FloatingActionButton(actionButtonStatus: $actionButtonStatus,
-                                             shouldAnimateListening: $shouldAnimateListening)
+                        FloatingActionButton()
                         .padding(.bottom, 40.0)
                     }
                 }

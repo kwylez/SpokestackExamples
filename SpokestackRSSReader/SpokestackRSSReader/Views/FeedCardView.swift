@@ -21,7 +21,7 @@ struct FeedCardView: View {
     
     var seeMoreCallback: FeedCardSeeMoreCallback?
     
-    @Binding var currentItem: RSSFeedItem?
+    @EnvironmentObject var viewModel: RSSViewModel
     
     var body: some View {
 
@@ -86,7 +86,7 @@ struct FeedCardView: View {
     
     private var isCurrent: Bool {
         
-        guard let current: RSSFeedItem = self.currentItem else {
+        guard let current: RSSFeedItem = self.viewModel.currentItem else {
             return false
         }
         
@@ -100,7 +100,6 @@ struct FeedCardView_Previews: PreviewProvider {
                                            title: "VTEXT, an e-commerce platform used by Walmart, raises $140M led by SoftBank's LatAm fund",
                                            link: "https://spokestack.io/",
                                            description: "This is my position",
-                                           imageLink: ""),
-                     currentItem: .constant(nil))
+                                           imageLink: ""))
     }
 }

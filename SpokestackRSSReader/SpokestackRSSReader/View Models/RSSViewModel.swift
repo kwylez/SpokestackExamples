@@ -26,13 +26,13 @@ class RSSViewModel: ObservableObject {
     
     /// Read-only list of `RSSFeedItem`'s.
     /// It will be published to any subscribers
-    @Published private (set) var feedItems: Array<RSSFeedItem> = []
+    @Published var feedItems: Array<RSSFeedItem> = []
     
     /// Optional `RSSFeedItem` instance
     /// It will be published to any subscribers
-    @Published private (set) var currentItem: RSSFeedItem?
+    @Published var currentItem: RSSFeedItem?
     
-    @Published private (set) var actionButtonStatus: FloatingActionButtonStatus = .unknown
+    @Published var actionButtonStatus: FloatingActionButtonStatus = .unknown
     
     // MARK: Private (properties)
     
@@ -100,6 +100,17 @@ class RSSViewModel: ObservableObject {
                                                     self.readArticleDescription(self.currentItem!)
         })
         .store(in: &self.subscriptions)
+    }
+    
+    func resumePlayback() -> Void {
+        self.speechController.resumePlayback()
+    }
+    
+    func pausePlayback() -> Void {
+        
+        if self.speechController.isPlaying {
+            self.speechController.pause()
+        }
     }
     
     /// Deactivates the `speechController`'s pipleline ASR.
@@ -233,7 +244,7 @@ class RSSViewModel: ObservableObject {
 
                     DispatchQueue.main.async {
 
-                        self?.actionButtonStatus = .isPaused
+                        self?.actionButtonStatus = .isWaiting
                         self?.speechController.activatePipelineASR()
                         self?.workerItem?.cancel()
                         self?.processNextItem()
@@ -246,7 +257,7 @@ class RSSViewModel: ObservableObject {
 
                      UIApplication.shared.isIdleTimerDisabled = false
 
-                     self.actionButtonStatus = .isPaused
+                     self.actionButtonStatus = .isFinished
                      self.isFinished.toggle()
                      self.deactiveSpeech()
                      self.speechController.respond(App.finishedMessage)

@@ -12,7 +12,7 @@ struct FeedItemDescriptionView: View {
     
     @Binding var showContent: Bool
     
-    @Binding var currentItem: RSSFeedItem?
+    @EnvironmentObject var viewModel: RSSViewModel
     
     @Binding var feedItemURL: URL?
     
@@ -32,7 +32,7 @@ struct FeedItemDescriptionView: View {
                 }
                 .frame(height: 75)
                 
-                Text(currentItem?.description ?? "Description not available")
+                Text(viewModel.currentItem?.description ?? "Description not available")
                     .font(.body)
                     .bold()
                     .padding(.horizontal)
@@ -57,7 +57,7 @@ struct FeedItemDescriptionView: View {
                     Spacer()
                     Button(action: {
                         
-                        if let url: URL = URL(string: self.currentItem!.link) {
+                        if let url: URL = URL(string: self.viewModel.currentItem!.link) {
                          
                             self.feedItemURL = url
                             self.showModal = true
@@ -98,7 +98,6 @@ struct FeedItemDescriptionView: View {
 struct FeedItemDescriptionView_Previews: PreviewProvider {
     static var previews: some View {
         FeedItemDescriptionView(showContent: .constant(false),
-                                currentItem: .constant(nil),
                                 feedItemURL: .constant(nil),
                                 showModal: .constant(false))
     }
