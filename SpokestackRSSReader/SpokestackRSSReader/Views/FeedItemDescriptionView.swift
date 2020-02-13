@@ -30,7 +30,7 @@ struct FeedItemDescriptionView: View {
                         .font(.headline).bold()
                         
                 }
-                .frame(height: 75)
+                .frame(height: 55)
                 
                 Text(viewModel.currentItem?.description ?? "Description not available")
                     .font(.body)
@@ -85,8 +85,6 @@ struct FeedItemDescriptionView: View {
                 Spacer()
             }
             .offset(x: -16, y: 16)
-            .transition(.move(edge: .top))
-            .animation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0))
             .onTapGesture {
                 self.showContent = false
             }
