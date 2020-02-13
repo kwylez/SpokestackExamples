@@ -6,6 +6,6 @@ target 'SpokestackRSSReader' do
   use_frameworks!
 
   # Pods for SpokestackRSSReader
-	pod 'Spokestack-iOS', :path => '~/DevProjects/iOS/Spokestack-iOS'
+	pod 'Spokestack-iOS'
 	pod 'FeedKit', '~> 9.0'
 end
