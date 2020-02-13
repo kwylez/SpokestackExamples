@@ -34,6 +34,14 @@ final class SpeechController: NSObject {
     
     /// Subject that publishes when a synthesized item is finished and sends the remote URL
     let synthesizeHasFinished = PassthroughSubject<URL, Never>()
+
+    /// Pause state of the player
+    private (set) var isPaused: Bool = false
+    
+    /// Returns if the player is playing or not
+    var isPlaying: Bool {
+        return self.player.spk_isPlaying
+    }
     
     // MARK: Private (properties)
     
@@ -160,15 +168,15 @@ final class SpeechController: NSObject {
     }
     
     func pause() -> Void {
+        
         self.player.pause()
+        self.isPaused.toggle()
     }
     
     func resumePlayback() -> Void {
+        
         self.player.play()
-    }
-    
-    var isPlaying: Bool {
-        return self.player.spk_isPlaying
+        self.isPaused.toggle()
     }
     
     /// Synthesizes and caches audio locally
@@ -257,9 +265,7 @@ final class SpeechController: NSObject {
     /// - Parameter url: Remote `URL` of file
     /// - Returns: `AnyPublisher<URL, Error>`
     private func processAudioURL(_ url: URL) -> AnyPublisher<URL, Error> {
-        print("url \(url)")
         return self.fetchSoundFile(url)
-        .print()
         .tryMap{data -> URL in
             return try self.processMP3(data)
         }
@@ -376,59 +382,6 @@ extension SpeechController: TextToSpeechDelegate {
     
     func didFinishSpeaking() {
         print("didFinishSpeaking")
-    }
-    
-    
-    /// The results from calling`parse`
-    /// - Parameter url: `URL` to the synth'd text to speech
-    func success(url: URL) {
-
-//        /// Fetch, save and publish the saved item / url
-//
-//        self.fetchSoundFile(url)
-//            .sink(receiveCompletion: {completion in
-//
-//            switch completion {
-//                case .finished:
-//                    break
-//                case .failure(let anError):
-//                    print("received error: ", anError)
-//            }
-//
-//        }, receiveValue: {data in
-//
-//            /// If there is a current item and ttstype then save the mp3 locally
-//            /// Based upon the type set the `cachedHeadlineLink` or
-//            /// `cachedDescriptionLink` property
-//
-//            if var currentItem: RSSFeedItem = self.feedItem,
-//                let itemTTSType: RSSFeedItemTTSType = self.itemTTSType {
-//
-//                let filename: String = UUID().uuidString + ".mp3"
-//
-//                let documentDirectory: URL = FileManager.spk_documentsDir!
-//                let fileURL: URL = documentDirectory.appendingPathComponent(filename)
-//
-//                try? data.write(to: fileURL)
-//
-//                if itemTTSType == .headline {
-//
-//                    currentItem.cachedHeadlineLink = fileURL
-//
-//                } else {
-//
-//                    currentItem.cachedDescriptionLink = fileURL
-//                }
-//
-//                self.synthesizeFeedItemHasFinished.send(currentItem)
-//                self.feedItem = nil
-//
-//            } else {
-//
-//                self.synthesizeHasFinished.send(url)
-//            }
-//        })
-//        .store(in: &self.subscriptions)
     }
     
     func failure(error: Error) {
