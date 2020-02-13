@@ -103,7 +103,10 @@ class RSSViewModel: ObservableObject {
     }
     
     func resumePlayback() -> Void {
-        self.speechController.resumePlayback()
+        
+        if self.speechController.isPaused {
+            self.speechController.resumePlayback()
+        }
     }
     
     func pausePlayback() -> Void {
