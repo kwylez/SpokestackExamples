@@ -28,9 +28,7 @@ struct ContentView: View {
     @State var feedItemURL: URL? = nil
     
     @State var showModal: Bool = false
-    
-    @State var isNavigationBarHidden: Bool = false
-    
+
     // MARK: Private (properties)
     
     @EnvironmentObject var viewModel: RSSViewModel
@@ -48,7 +46,6 @@ struct ContentView: View {
                                 
                                 self.viewModel.readArticleDescription(feedItem)
                                 self.showContent = true
-                                self.isNavigationBarHidden = true
 
                             }, seeMoreCallback: {url in
 
@@ -67,16 +64,15 @@ struct ContentView: View {
                 .sheet(isPresented: self.$showModal, content: {
                     SafariView(url: self.feedItemURL)
                 })
-                .navigationBarTitle(isNavigationBarHidden ? "" : "\(App.Feed.heading)", displayMode: .inline)
-                .navigationBarHidden(self.isNavigationBarHidden)
-                .blur(radius: isNavigationBarHidden ? 5 : 0)
+                .navigationBarTitle(self.showContent ? "" : "\(App.Feed.heading)", displayMode: .inline)
+                .navigationBarHidden(self.showContent)
+                .blur(radius: showContent ? 5 : 0)
                 
                 VStack {
                     Spacer()
                     ZStack(alignment: .bottom) {
                         WaveView()
                             .opacity(self.viewModel.actionButtonStatus == .isListening ? 1 : 0)
-                            .animation(.spring())
                         FloatingActionButton()
                         .padding(.bottom, 40.0)
                     }
@@ -90,7 +86,6 @@ struct ContentView: View {
                         .opacity(0.8)
                         .onTapGesture {
                             self.showContent.toggle()
-                            self.isNavigationBarHidden.toggle()
                     }
                     
                     /// Note:
