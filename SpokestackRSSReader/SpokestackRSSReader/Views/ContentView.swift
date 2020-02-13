@@ -29,6 +29,8 @@ struct ContentView: View {
     
     @State var showModal: Bool = false
     
+    @State var isNavigationBarHidden: Bool = false
+    
     // MARK: Private (properties)
     
     @EnvironmentObject var viewModel: RSSViewModel
@@ -46,12 +48,12 @@ struct ContentView: View {
                                 
                                 self.viewModel.readArticleDescription(feedItem)
                                 self.showContent = true
+                                self.isNavigationBarHidden = true
 
                             }, seeMoreCallback: {url in
 
                                 self.feedItemURL = url
                                 self.showModal = true
-
                             })
                         }
                     }
@@ -65,13 +67,9 @@ struct ContentView: View {
                 .sheet(isPresented: self.$showModal, content: {
                     SafariView(url: self.feedItemURL)
                 })
-                .sheet(isPresented: self.$showContent, content: {
-
-                    FeedItemDescriptionView(showContent: self.$showContent,
-                                            feedItemURL: self.$feedItemURL,
-                                            showModal: self.$showModal)
-                })
-                .navigationBarTitle("\(App.Feed.heading)", displayMode: .inline)
+                .navigationBarTitle(isNavigationBarHidden ? "" : "\(App.Feed.heading)", displayMode: .inline)
+                .navigationBarHidden(self.isNavigationBarHidden)
+                .blur(radius: isNavigationBarHidden ? 5 : 0)
                 
                 VStack {
                     Spacer()
@@ -84,6 +82,29 @@ struct ContentView: View {
                     }
                 }
                 .edgesIgnoringSafeArea(.bottom)
+                
+                if self.showContent {
+                    
+                    Color.black
+                        .edgesIgnoringSafeArea(.all)
+                        .opacity(0.8)
+                        .onTapGesture {
+                            self.showContent.toggle()
+                            self.isNavigationBarHidden.toggle()
+                    }
+                    
+                    /// Note:
+                    /// You have to set the zIndex to 1 or the the "dismissal" will not animate properly
+                    
+                    FeedItemDescriptionView(showContent: $showContent,
+                                            feedItemURL: $feedItemURL,
+                                            showModal: $showModal)
+                        .environmentObject(self.viewModel)
+                        .transition(.move(edge: .bottom))
+                        .animation(.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0))
+                        .offset(x: 0, y: 100.0)
+                        .zIndex(1)
+                }
             }
         }
     }
